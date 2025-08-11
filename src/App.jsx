@@ -6,6 +6,28 @@ import axios from 'axios'; // Used to make API calls to the backend
 const API_URL = 'http://localhost:5001/api';
 
 // --- SVG Icons ---
+const LogoIcon = () => (
+    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+             <linearGradient id="grad3" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" className="stop-color-light dark:stop-color-dark-start" />
+                <stop offset="100%" className="stop-color-dark dark:stop-color-dark-end" />
+            </linearGradient>
+        </defs>
+        <path d="M20 80 Q 50 80, 50 50" fill="none" className="stroke-light dark:stroke-dark-start" strokeWidth="12" strokeLinecap="round"/>
+        <path d="M50 50 Q 50 20, 80 20" fill="none" stroke="url(#grad3)" strokeWidth="12" strokeLinecap="round"/>
+        <style>
+            {`
+                .stop-color-light { stop-color: #a5b4fc; }
+                .stop-color-dark { stop-color: #4f46e5; }
+                .stroke-light { stroke: #a5b4fc; }
+                .dark .stop-color-dark-start { stop-color: #c4b5fd; }
+                .dark .stop-color-dark-end { stop-color: #6366f1; }
+                .dark .stroke-dark-start { stroke: #c4b5fd; }
+            `}
+        </style>
+    </svg>
+);
 const SparklesIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM5.22 5.22a.75.75 0 011.06 0l1.06 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zM13.66 6.34a.75.75 0 011.06-1.06l1.06 1.06a.75.75 0 11-1.06 1.06l-1.06-1.06zM2 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 012 10zm14.25.75a.75.75 0 000-1.5h-1.5a.75.75 0 000 1.5h1.5zm-6.03 4.47a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm1.06-1.06a.75.75 0 011.06 0l1.06 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zM10 18a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 0110 18z" clipRule="evenodd" /></svg>
 );
@@ -46,7 +68,8 @@ const VideoBackground = () => (
 
 const Navbar = ({ theme, toggleTheme }) => (
     <nav className="w-full p-6 flex justify-between items-center">
-        <div className="flex items-center">
+        <div className="flex items-center space-x-3">
+            <LogoIcon />
             <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-wide">
                 <span className="text-indigo-600 dark:text-indigo-400">C</span>areerion
             </h1>
