@@ -1,9 +1,28 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, FC } from 'react';
 import axios from 'axios'; // Used to make API calls to the backend
 
 // --- API Configuration ---
 // This is the URL of the backend server we created.
 const API_URL = 'http://localhost:5001/api';
+
+// --- TypeScript Interfaces ---
+interface Message {
+    sender: 'user' | 'ai';
+    text: string;
+}
+
+interface NavbarProps {
+    theme: string;
+    toggleTheme: () => void;
+    onLoginClick: () => void;
+    onSignupClick: () => void;
+}
+
+interface AuthModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    initialMode: 'login' | 'signup';
+}
 
 // --- SVG Icons ---
 const LogoIcon = () => (
@@ -55,7 +74,7 @@ const TypingIndicator = () => (
 
 // --- React Components ---
 
-const VideoBackground = () => (
+const VideoBackground: React.FC = () => (
     <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
         <img 
             src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNTBsc2I0ZzNqZ3U5d2Y5b3J5dG5oY2JqNnN4c3A2dG16a2c2ajc2eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT9C25UNTwfZuE0aYg/giphy.gif"
@@ -66,7 +85,7 @@ const VideoBackground = () => (
     </div>
 );
 
-const Navbar = ({ theme, toggleTheme }) => (
+const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme, onLoginClick, onSignupClick }) => (
     <nav className="w-full p-6 flex justify-between items-center">
         <div className="flex items-center space-x-3">
             <LogoIcon />
@@ -78,27 +97,27 @@ const Navbar = ({ theme, toggleTheme }) => (
             <button onClick={toggleTheme} className="p-2 rounded-full text-slate-700 dark:text-gray-200 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors">
                 {theme === 'light' ? <MoonIcon /> : <SunIcon />}
             </button>
-            <button className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors">
+            <button onClick={onSignupClick} className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors">
                 Sign up
             </button>
-            <button className="text-slate-700 dark:text-gray-200 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors">
+            <button onClick={onLoginClick} className="text-slate-700 dark:text-gray-200 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors">
                 Log in
             </button>
         </div>
     </nav>
 );
 
-const MainContent = () => (
+const MainContent: React.FC = () => (
     <div className="w-full lg:w-1/2 p-6 flex flex-col justify-center"><h1 className="text-5xl md:text-6xl font-bold text-slate-800 dark:text-white leading-tight">Beyond the Job Board.<br />Discover Your True Potential.</h1><p className="mt-8 text-lg text-slate-600 dark:text-gray-300">Whether you're a student, a graduate, or a professional, our AI-powered coach <br />helps you discover and navigate the career you were meant for.</p></div>
 );
 
-const CareerCoach = () => {
-    const [messages, setMessages] = useState([]);
+const CareerCoach: React.FC = () => {
+    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isChatting, setIsChatting] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const chatEndRef = useRef(null);
+    const [error, setError] = useState<string | null>(null);
+    const chatEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (isChatting) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -110,7 +129,7 @@ const CareerCoach = () => {
         setError(null);
     };
 
-    const getAIResponse = async (userMessage) => {
+    const getAIResponse = async (userMessage: Message) => {
         setIsLoading(true);
         setError(null);
         
@@ -133,7 +152,7 @@ const CareerCoach = () => {
         }
     };
 
-    const startConversation = (topic) => {
+    const startConversation = (topic: string) => {
         setIsChatting(true);
         let userMessageText = '';
         switch(topic) {
@@ -142,7 +161,7 @@ const CareerCoach = () => {
             case 'chat': userMessageText = 'I just want to chat.'; break;
             default: return;
         }
-        const userMessage = { sender: 'user', text: userMessageText };
+        const userMessage: Message = { sender: 'user', text: userMessageText };
         setMessages([userMessage]);
         getAIResponse(userMessage);
     };
@@ -150,7 +169,7 @@ const CareerCoach = () => {
     const handleSendMessage = () => {
         if (input.trim() === '' || isLoading) return;
         if (!isChatting) setIsChatting(true);
-        const userMessage = { sender: 'user', text: input };
+        const userMessage: Message = { sender: 'user', text: input };
         setMessages(prev => [...prev, userMessage]);
         setInput('');
         getAIResponse(userMessage);
@@ -169,13 +188,88 @@ const CareerCoach = () => {
     );
 
     return (
-        <div className="w-full lg:w-1/2 p-6 flex items-center justify-center"><div className="w-full max-w-md h-[70vh] flex flex-col bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-white/10 shadow-lg"><div className="flex items-center justify-center relative p-4 border-b border-slate-200 dark:border-white/10 flex-shrink-0">{isChatting && (<button onClick={handleBack} className="absolute left-4 p-1 rounded-full text-slate-600 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-white/20 transition-colors"><ArrowLeftIcon /></button>)}<h2 className="text-xl font-semibold text-slate-800 dark:text-white">Career Coach</h2></div><div className="flex-grow overflow-y-auto">{isChatting ? <MessageList /> : <InitialButtons />}</div><div className="p-4 border-t border-slate-200 dark:border-white/10 flex-shrink-0"><div className="relative"><input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()} placeholder={isChatting ? "Type your message..." : "Or ask anything about your career..."} className="w-full bg-slate-100 dark:bg-white/10 border border-slate-300 dark:border-white/20 rounded-full py-3 pl-4 pr-12 text-slate-800 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" disabled={isLoading} /><button onClick={handleSendMessage} disabled={isLoading || input.trim() === ''} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:bg-indigo-800 transition-colors"><SendIcon /></button></div></div></div></div>
+        <div className="w-full lg:w-1/2 p-6 flex items-center justify-center">
+            <div className="w-full max-w-md h-[60vh] flex flex-col bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-white/10 shadow-lg">
+                <div className="flex items-center justify-center relative p-4 border-b border-slate-200 dark:border-white/10 flex-shrink-0">
+                    {isChatting && (<button onClick={handleBack} className="absolute left-4 p-1 rounded-full text-slate-600 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-white/20 transition-colors"><ArrowLeftIcon /></button>)}
+                    <h2 className="text-xl font-semibold text-slate-800 dark:text-white">Career Coach</h2>
+                </div>
+                <div className="flex-grow overflow-y-auto">
+                    {isChatting ? <MessageList /> : <InitialButtons />}
+                </div>
+                <div className="p-4 border-t border-slate-200 dark:border-white/10 flex-shrink-0">
+                    <div className="relative">
+                        <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSendMessage()} placeholder={isChatting ? "Type your message..." : "Or ask anything about your career..."} className="w-full bg-slate-100 dark:bg-white/10 border border-slate-300 dark:border-white/20 rounded-full py-3 pl-4 pr-12 text-slate-800 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" disabled={isLoading} />
+                        <button onClick={handleSendMessage} disabled={isLoading || input.trim() === ''} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:bg-indigo-800 transition-colors"><SendIcon /></button>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };
+
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
+            <div 
+                className="bg-slate-800/50 backdrop-blur-lg rounded-2xl border border-white/10 shadow-2xl w-full max-w-md text-white overflow-hidden" 
+                onClick={(e) => e.stopPropagation()}
+            >
+                {initialMode === 'login' ? (
+                    <div className="p-8">
+                        <h2 className="text-3xl font-bold mb-2">Welcome Back</h2>
+                        <p className="text-gray-400 mb-6">Log in to continue your journey.</p>
+                        <form className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                                <input type="email" className="w-full p-3 bg-white/10 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                                <input type="password" className="w-full p-3 bg-white/10 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                            </div>
+                            <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105">
+                                Log In
+                            </button>
+                        </form>
+                    </div>
+                ) : (
+                    <div className="p-8">
+                        <h2 className="text-3xl font-bold mb-2">Create Account</h2>
+                        <p className="text-gray-400 mb-6">Start your personalized career path today.</p>
+                        <form className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Name</label>
+                                <input type="text" className="w-full p-3 bg-white/10 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                                <input type="email" className="w-full p-3 bg-white/10 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                                <input type="password" className="w-full p-3 bg-white/10 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                            </div>
+                            <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105">
+                                Create Account
+                            </button>
+                        </form>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 
 // The main App component that brings everything together
 export default function App() {
     const [theme, setTheme] = useState('dark');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+
     useEffect(() => {
         if (theme === 'dark') {
             document.documentElement.classList.add('dark');
@@ -183,18 +277,38 @@ export default function App() {
             document.documentElement.classList.remove('dark');
         }
     }, [theme]);
+
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+
+    const handleOpenModal = (mode: 'login' | 'signup') => {
+        setAuthMode(mode);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
 
     return (
         <div className="min-h-screen w-full font-sans bg-slate-50 dark:bg-gray-900 relative">
             {theme === 'dark' && <VideoBackground />}
             <div className="relative z-10">
-                <Navbar theme={theme} toggleTheme={toggleTheme} />
+                <Navbar 
+                    theme={theme} 
+                    toggleTheme={toggleTheme}
+                    onLoginClick={() => handleOpenModal('login')}
+                    onSignupClick={() => handleOpenModal('signup')}
+                />
                 <main className="flex flex-col lg:flex-row container mx-auto px-6 pb-12">
                     <MainContent />
                     <CareerCoach />
                 </main>
             </div>
+            <AuthModal 
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                initialMode={authMode}
+            />
         </div>
     );
 }
