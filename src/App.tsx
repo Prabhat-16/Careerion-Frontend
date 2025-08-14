@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, FC } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios'; // Used to make API calls to the backend
 
 // --- API Configuration ---
@@ -24,7 +24,19 @@ interface AuthModalProps {
     initialMode: 'login' | 'signup';
 }
 
+interface VideoBackgroundProps {
+    theme: string;
+}
+
 // --- SVG Icons ---
+const GoogleIcon = () => (
+    <svg className="w-5 h-5 mr-3" viewBox="0 0 48 48">
+        <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
+        <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+        <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.519-3.486-11.181-8.207l-6.571,4.819C9.656,39.663,16.318,44,24,44z"></path>
+        <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.978,36.218,44,30.608,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
+    </svg>
+);
 const LogoIcon = () => (
     <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -74,14 +86,10 @@ const TypingIndicator = () => (
 
 // --- React Components ---
 
-const VideoBackground: React.FC = () => (
+const VideoBackground: React.FC<VideoBackgroundProps> = ({ theme }) => (
     <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-        <img 
-            src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNTBsc2I0ZzNqZ3U5d2Y5b3J5dG5oY2JqNnN4c3A2dG16a2c2ajc2eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT9C25UNTwfZuE0aYg/giphy.gif"
-            alt="Abstract network animation"
-            className="w-full h-full object-cover"
-        />
-        <div className="absolute top-0 left-0 w-full h-full bg-black/80"></div>
+        {/* Simple, clean background */}
+        <div className={`absolute inset-0 ${theme === 'light' ? 'bg-gradient-to-br from-blue-50 to-purple-50' : 'bg-gradient-to-br from-slate-900 to-indigo-900'}`}></div>
     </div>
 );
 
@@ -90,17 +98,17 @@ const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme, onLoginClick, onSig
         <div className="flex items-center space-x-3">
             <LogoIcon />
             <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-wide">
-                <span className="text-indigo-600 dark:text-indigo-400">C</span>areerion
+                <span className="text-primary-600 dark:text-primary-400">C</span>areerion
             </h1>
         </div>
         <div className="flex items-center space-x-2 sm:space-x-4">
-            <button onClick={toggleTheme} className="p-2 rounded-full text-slate-700 dark:text-gray-200 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors">
+            <button onClick={toggleTheme} className="p-2 rounded-full text-slate-700 dark:text-gray-200 hover:bg-glass-200 dark:hover:bg-dark-glass-200 transition-all duration-300 rounded-full backdrop-blur-sm">
                 {theme === 'light' ? <MoonIcon /> : <SunIcon />}
             </button>
-            <button onClick={onSignupClick} className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors">
+            <button onClick={onSignupClick} className="bg-gradient-to-r from-primary-500 to-accent-500 text-white px-5 py-2 rounded-lg text-sm font-semibold border border-primary-400/50 hover:from-primary-600 hover:to-accent-600 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm">
                 Sign up
             </button>
-            <button onClick={onLoginClick} className="text-slate-700 dark:text-gray-200 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors">
+            <button onClick={onLoginClick} className="text-slate-800 dark:text-gray-200 px-5 py-2 rounded-lg text-sm font-semibold bg-glass-200 dark:bg-dark-glass-200 border border-slate-300/50 dark:border-white/20 hover:bg-glass-300 dark:hover:bg-dark-glass-300 transition-all duration-300 backdrop-blur-sm">
                 Log in
             </button>
         </div>
@@ -108,7 +116,15 @@ const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme, onLoginClick, onSig
 );
 
 const MainContent: React.FC = () => (
-    <div className="w-full lg:w-1/2 p-6 flex flex-col justify-center"><h1 className="text-5xl md:text-6xl font-bold text-slate-800 dark:text-white leading-tight">Beyond the Job Board.<br />Discover Your True Potential.</h1><p className="mt-8 text-lg text-slate-600 dark:text-gray-300">Whether you're a student, a graduate, or a professional, our AI-powered coach <br />helps you discover and navigate the career you were meant for.</p></div>
+    <div className="w-full lg:w-1/2 p-6 flex flex-col justify-center">
+        <h1 className="text-5xl md:text-6xl font-bold text-slate-800 dark:text-white leading-tight bg-gradient-to-r from-slate-800 via-primary-700 to-accent-600 dark:from-white dark:via-primary-300 dark:to-accent-400 bg-clip-text text-transparent">
+            Beyond the Job Board.<br />Discover Your True Potential.
+        </h1>
+        <p className="mt-8 text-lg text-slate-600 dark:text-gray-300">
+            Whether you're a student, a graduate, or a professional, our AI-powered coach <br />
+            helps you discover and navigate the career you were meant for.
+        </p>
+    </div>
 );
 
 const CareerCoach: React.FC = () => {
@@ -177,30 +193,59 @@ const CareerCoach: React.FC = () => {
 
     const InitialButtons = () => (
         <div className="space-y-4 p-4">
-            <button onClick={() => startConversation('discover')} className="w-full flex items-center justify-center text-left p-4 bg-slate-700 text-white rounded-lg hover:bg-slate-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors shadow-md"><SparklesIcon />Discover My Career Path</button>
-            <button onClick={() => startConversation('explore')} className="w-full flex items-center justify-center text-left p-4 bg-slate-700 text-white rounded-lg hover:bg-slate-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors shadow-md"><BriefcaseIcon />Explore Career Fields</button>
-            <button onClick={() => startConversation('chat')} className="w-full flex items-center justify-center text-left p-4 bg-slate-700 text-white rounded-lg hover:bg-slate-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors shadow-md"><ChatBubbleLeftRightIcon />Chat with AI</button>
+            <button onClick={() => startConversation('discover')} className="w-full flex items-center justify-center text-left p-4 bg-glass-200 dark:bg-dark-glass-200 text-slate-800 dark:text-white rounded-xl hover:bg-glass-300 dark:hover:bg-dark-glass-300 transition-all duration-300 shadow-lg hover:shadow-xl border border-slate-300/50 dark:border-white/20 backdrop-blur-sm hover:scale-105">
+                <SparklesIcon />Discover My Career Path
+            </button>
+            <button onClick={() => startConversation('explore')} className="w-full flex items-center justify-center text-left p-4 bg-glass-200 dark:bg-dark-glass-200 text-slate-800 dark:text-white rounded-xl hover:bg-glass-300 dark:hover:bg-dark-glass-300 transition-all duration-300 shadow-lg hover:shadow-xl border border-slate-300/50 dark:border-white/20 backdrop-blur-sm hover:scale-105">
+                <BriefcaseIcon />Explore Career Fields
+            </button>
+            <button onClick={() => startConversation('chat')} className="w-full flex items-center justify-center text-left p-4 bg-glass-200 dark:bg-dark-glass-200 text-slate-800 dark:text-white rounded-xl hover:bg-glass-300 dark:hover:bg-dark-glass-300 transition-all duration-300 shadow-lg hover:shadow-xl border border-slate-300/50 dark:border-white/20 backdrop-blur-sm hover:scale-105">
+                <ChatBubbleLeftRightIcon />Chat with AI
+            </button>
         </div>
     );
 
     const MessageList = () => (
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">{messages.map((msg, index) => (<div key={index} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>{msg.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-indigo-500 flex-shrink-0"></div>}<div className={`px-4 py-2 rounded-lg max-w-xs md:max-w-sm ${msg.sender === 'user' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-gray-700 text-slate-800 dark:text-gray-200'}`}>{msg.text}</div></div>))}{isLoading && (<div className="flex items-start gap-3"><div className="w-8 h-8 rounded-full bg-indigo-500 flex-shrink-0"></div><div className="px-4 py-2 rounded-lg bg-slate-100 dark:bg-gray-700"><TypingIndicator /></div></div>)}{error && <div className="text-center text-red-500 text-sm p-2">{error}</div>}<div ref={chatEndRef} /></div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.map((msg, index) => (
+                <div key={index} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
+                    {msg.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex-shrink-0 shadow-lg"></div>}
+                    <div className={`px-4 py-2 rounded-xl max-w-xs md:max-w-sm backdrop-blur-sm ${
+                        msg.sender === 'user' 
+                            ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg' 
+                            : 'bg-glass-200 dark:bg-dark-glass-200 text-slate-800 dark:text-white border border-slate-300/30 dark:border-white/20'
+                    }`}>
+                        {msg.text}
+                    </div>
+                </div>
+            ))}
+            {isLoading && (
+                <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex-shrink-0 shadow-lg"></div>
+                    <div className="px-4 py-2 rounded-xl bg-glass-200 dark:bg-dark-glass-200 border border-slate-300/30 dark:border-white/20">
+                        <TypingIndicator />
+                    </div>
+                </div>
+            )}
+            {error && <div className="text-center text-red-500 text-sm p-2">{error}</div>}
+            <div ref={chatEndRef} />
+        </div>
     );
 
     return (
         <div className="w-full lg:w-1/2 p-6 flex items-center justify-center">
-            <div className="w-full max-w-md h-[60vh] flex flex-col bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-white/10 shadow-lg">
-                <div className="flex items-center justify-center relative p-4 border-b border-slate-200 dark:border-white/10 flex-shrink-0">
+            <div className="w-full max-w-md h-[60vh] flex flex-col bg-glass-300 dark:bg-dark-glass-300 backdrop-blur-xl rounded-2xl border border-slate-300/50 dark:border-white/20 shadow-2xl">
+                <div className="flex items-center justify-center relative p-4 border-b border-slate-300 dark:border-white/10 flex-shrink-0">
                     {isChatting && (<button onClick={handleBack} className="absolute left-4 p-1 rounded-full text-slate-600 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-white/20 transition-colors"><ArrowLeftIcon /></button>)}
                     <h2 className="text-xl font-semibold text-slate-800 dark:text-white">Career Coach</h2>
                 </div>
                 <div className="flex-grow overflow-y-auto">
                     {isChatting ? <MessageList /> : <InitialButtons />}
                 </div>
-                <div className="p-4 border-t border-slate-200 dark:border-white/10 flex-shrink-0">
+                <div className="p-4 border-t border-slate-300 dark:border-white/10 flex-shrink-0">
                     <div className="relative">
-                        <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSendMessage()} placeholder={isChatting ? "Type your message..." : "Or ask anything about your career..."} className="w-full bg-slate-100 dark:bg-white/10 border border-slate-300 dark:border-white/20 rounded-full py-3 pl-4 pr-12 text-slate-800 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" disabled={isLoading} />
-                        <button onClick={handleSendMessage} disabled={isLoading || input.trim() === ''} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:bg-indigo-800 transition-colors"><SendIcon /></button>
+                        <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSendMessage()} placeholder={isChatting ? "Type your message..." : "Or ask anything about your career..."} className="w-full bg-glass-200 dark:bg-dark-glass-200 border border-slate-300/50 dark:border-white/20 rounded-full py-3 pl-4 pr-12 text-slate-800 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 backdrop-blur-sm" disabled={isLoading} />
+                        <button onClick={handleSendMessage} disabled={isLoading || input.trim() === ''} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-full hover:from-primary-600 hover:to-accent-600 disabled:from-primary-800 disabled:to-accent-800 transition-all duration-300 shadow-lg"><SendIcon /></button>
                     </div>
                 </div>
             </div>
@@ -210,52 +255,78 @@ const CareerCoach: React.FC = () => {
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode }) => {
     if (!isOpen) return null;
+    
+    const handleGoogleSignIn = () => {
+        // Placeholder for Google Sign-In logic
+        console.log("Attempting to sign in with Google...");
+    };
 
     return (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
+        <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn"
+            onClick={onClose}
+        >
             <div 
-                className="bg-slate-800/50 backdrop-blur-lg rounded-2xl border border-white/10 shadow-2xl w-full max-w-md text-white overflow-hidden" 
+                className="bg-glass-400 dark:bg-dark-glass-400 backdrop-blur-xl rounded-2xl border border-slate-300/50 dark:border-white/20 shadow-2xl w-full max-w-md text-slate-800 dark:text-white overflow-hidden animate-slideInUp"
                 onClick={(e) => e.stopPropagation()}
             >
                 {initialMode === 'login' ? (
-                    <div className="p-8">
-                        <h2 className="text-3xl font-bold mb-2">Welcome Back</h2>
-                        <p className="text-gray-400 mb-6">Log in to continue your journey.</p>
+                    <div className="p-8 animate-fadeInUp">
+                        <h2 className="text-3xl font-bold mb-2 animate-slideInRight">Welcome Back</h2>
+                        <p className="text-slate-600 dark:text-gray-400 mb-6 animate-slideInRight" style={{ animationDelay: '0.1s' }}>Log in to continue your journey.</p>
                         <form className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
-                                <input type="email" className="w-full p-3 bg-white/10 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                            <div className="animate-slideInUp" style={{ animationDelay: '0.2s' }}>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Email</label>
+                                <input type="email" className="w-full p-3 bg-glass-200 dark:bg-dark-glass-200 rounded-lg border border-slate-300/50 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-primary-500 backdrop-blur-sm transition-all duration-300 hover:bg-glass-300 dark:hover:bg-dark-glass-300" />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
-                                <input type="password" className="w-full p-3 bg-white/10 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                            <div className="animate-slideInUp" style={{ animationDelay: '0.3s' }}>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Password</label>
+                                <input type="password" className="w-full p-3 bg-glass-200 dark:bg-dark-glass-200 rounded-lg border border-slate-300/50 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-primary-500 backdrop-blur-sm transition-all duration-300 hover:bg-glass-300 dark:hover:bg-dark-glass-300" />
                             </div>
-                            <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105">
+                            <button type="submit" className="w-full bg-gradient-to-r from-primary-500 to-accent-500 text-white py-3 rounded-lg font-semibold hover:from-primary-600 hover:to-accent-600 transition-all duration-300 transform hover:scale-105 shadow-lg animate-slideInUp" style={{ animationDelay: '0.4s' }}>
                                 Log In
                             </button>
                         </form>
+                        <div className="flex items-center my-6 animate-fadeIn" style={{ animationDelay: '0.5s' }}>
+                            <hr className="flex-grow border-slate-300 dark:border-white/20" />
+                            <span className="px-4 text-slate-500 dark:text-gray-400 text-sm">OR</span>
+                            <hr className="flex-grow border-slate-300 dark:border-white/20" />
+                        </div>
+                        <button onClick={handleGoogleSignIn} className="w-full flex items-center justify-center bg-white/80 dark:bg-white/10 text-slate-800 dark:text-white py-3 rounded-lg font-semibold hover:bg-white dark:hover:bg-white/20 transition-all duration-300 transform hover:scale-105 animate-slideInUp" style={{ animationDelay: '0.6s' }}>
+                            <GoogleIcon />
+                            Continue with Google
+                        </button>
                     </div>
                 ) : (
-                    <div className="p-8">
-                        <h2 className="text-3xl font-bold mb-2">Create Account</h2>
-                        <p className="text-gray-400 mb-6">Start your personalized career path today.</p>
+                    <div className="p-8 animate-fadeInUp">
+                        <h2 className="text-3xl font-bold mb-2 animate-slideInRight">Create Account</h2>
+                        <p className="text-slate-600 dark:text-gray-400 mb-6 animate-slideInRight" style={{ animationDelay: '0.1s' }}>Start your personalized career path today.</p>
                         <form className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Name</label>
-                                <input type="text" className="w-full p-3 bg-white/10 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                            <div className="animate-slideInUp" style={{ animationDelay: '0.2s' }}>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Name</label>
+                                <input type="text" className="w-full p-3 bg-glass-200 dark:bg-dark-glass-200 rounded-lg border border-slate-300/50 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-primary-500 backdrop-blur-sm transition-all duration-300 hover:bg-glass-300 dark:hover:bg-dark-glass-300" />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
-                                <input type="email" className="w-full p-3 bg-white/10 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                            <div className="animate-slideInUp" style={{ animationDelay: '0.3s' }}>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Email</label>
+                                <input type="email" className="w-full p-3 bg-glass-200 dark:bg-dark-glass-200 rounded-lg border border-slate-300/50 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-primary-500 backdrop-blur-sm transition-all duration-300 hover:bg-glass-300 dark:hover:bg-dark-glass-300" />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
-                                <input type="password" className="w-full p-3 bg-white/10 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                            <div className="animate-slideInUp" style={{ animationDelay: '0.4s' }}>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Password</label>
+                                <input type="password" className="w-full p-3 bg-glass-200 dark:bg-dark-glass-200 rounded-lg border border-slate-300/50 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-primary-500 backdrop-blur-sm transition-all duration-300 hover:bg-glass-300 dark:hover:bg-dark-glass-300" />
                             </div>
-                            <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105">
+                            <button type="submit" className="w-full bg-gradient-to-r from-primary-500 to-accent-500 text-white py-3 rounded-lg font-semibold hover:from-primary-600 hover:to-accent-600 transition-all duration-300 transform hover:scale-105 shadow-lg animate-slideInUp" style={{ animationDelay: '0.5s' }}>
                                 Create Account
                             </button>
                         </form>
+                        <div className="flex items-center my-6 animate-fadeIn" style={{ animationDelay: '0.6s' }}>
+                            <hr className="flex-grow border-slate-300 dark:border-white/20" />
+                            <span className="px-4 text-slate-500 dark:text-gray-400 text-sm">OR</span>
+                            <hr className="flex-grow border-slate-300 dark:border-white/20" />
+                        </div>
+                        <button onClick={handleGoogleSignIn} className="w-full flex items-center justify-center bg-white/80 dark:bg-white/10 text-slate-800 dark:text-white py-3 rounded-lg font-semibold hover:bg-white dark:hover:bg-white/20 transition-all duration-300 transform hover:scale-105 animate-slideInUp" style={{ animationDelay: '0.7s' }}>
+                            <GoogleIcon />
+                            Continue with Google
+                        </button>
                     </div>
                 )}
             </div>
@@ -290,8 +361,8 @@ export default function App() {
     };
 
     return (
-        <div className="min-h-screen w-full font-sans bg-slate-50 dark:bg-gray-900 relative">
-            {theme === 'dark' && <VideoBackground />}
+        <div className="min-h-screen w-full font-sans bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-900 relative">
+            <VideoBackground theme={theme} />
             <div className="relative z-10">
                 <Navbar 
                     theme={theme} 
