@@ -2,243 +2,111 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom transparency effects */
+/* A more professional, higher-contrast glass for light mode */
 .glass-effect {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: rgba(248, 250, 252, 0.2); /* slate-50 at 20% opacity for MORE transparency */
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  transition: all 0.3s ease-in-out;
 }
 
-.dark-glass-effect {
-  background: rgba(0, 0, 0, 0.1);
+.dark .dark-glass-effect {
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Hover Effects */
+.glass-effect:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15);
+}
+
+.dark .dark-glass-effect:hover {
+  background: rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Blue gradient text for light mode */
+.glass-text {
+  background: linear-gradient(45deg, #1e3a8a, #3b82f6); /* From dark blue to a lighter blue */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+/* White gradient text for dark mode */
+.dark .glass-text {
+  background: linear-gradient(45deg, #ffffff, rgba(255, 255, 255, 0.9));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Glass Buttons */
+.glass-button {
+  @apply px-6 py-2 rounded-lg transition-all duration-300 ease-in-out;
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 500;
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Input Fields */
+.glass-input {
+  @apply w-full p-3 rounded-lg transition-all duration-300;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Enhanced career-themed animations */
-@keyframes float {
-  0%, 100% { 
-    transform: translateY(0px) rotate(0deg); 
-  }
-  50% { 
-    transform: translateY(-20px) rotate(2deg); 
-  }
+.dark .glass-input {
+    background: rgba(0, 0, 0, 0.1);
 }
 
-@keyframes float-reverse {
-  0%, 100% { 
-    transform: translateY(0px) rotate(0deg); 
-  }
-  50% { 
-    transform: translateY(20px) rotate(-2deg); 
-  }
+.glass-input:focus {
+  @apply outline-none ring-2 ring-opacity-50 ring-blue-400;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-@keyframes flow {
-  0% {
-    transform: translateY(100vh) translateX(0px);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-100px) translateX(100px);
-    opacity: 0;
-  }
-}
-
-@keyframes glow {
-  0% { 
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-    filter: brightness(1);
-  }
-  100% { 
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
-    filter: brightness(1.2);
-  }
-}
-
-@keyframes shimmer {
-  0% { 
-    transform: translateX(-100%) skewX(-15deg); 
-  }
-  100% { 
-    transform: translateX(200%) skewX(-15deg); 
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { 
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% { 
-    opacity: 0.6;
-    transform: scale(1.1);
-  }
-}
-
-@keyframes network-flow {
-  0% { 
-    stroke-dashoffset: 0;
-    opacity: 0.3;
-  }
-  50% { 
-    opacity: 0.8;
-  }
-  100% { 
-    stroke-dashoffset: -100;
-    opacity: 0.3;
-  }
-}
-
-@keyframes career-rise {
-  0% { 
-    transform: translateY(100px) scale(0.8);
-    opacity: 0;
-  }
-  50% { 
-    opacity: 1;
-  }
-  100% { 
-    transform: translateY(-100px) scale(1.2);
-    opacity: 0;
-  }
-}
-
-/* Smooth transitions */
-* {
-  transition: all 0.3s ease;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.5);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.7);
-}
-
-/* Career-themed floating elements */
-.career-icon {
-  animation: float 6s ease-in-out infinite;
-}
-
-.career-icon:nth-child(even) {
-  animation: float-reverse 8s ease-in-out infinite;
-}
-
-.network-line {
-  animation: network-flow 12s linear infinite;
-}
-
-.career-particle {
-  animation: career-rise 8s ease-in-out infinite;
-}
-
-/* Responsive animations */
-@media (max-width: 768px) {
-  .career-icon {
-    animation-duration: 8s;
-  }
-  
-  .network-line {
-    animation-duration: 16s;
-  }
-}
-
-/* Additional visible animations */
-@keyframes slide-in-left {
-  0% {
-    transform: translateX(-100px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slide-in-right {
-  0% {
-    transform: translateX(100px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fade-in-up {
-  0% {
-    transform: translateY(50px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-/* Apply animations to elements */
-.slide-in-left {
-  animation: slide-in-left 2s ease-out;
-}
-
-.slide-in-right {
-  animation: slide-in-right 2s ease-out;
-}
-
-.fade-in-up {
-  animation: fade-in-up 2s ease-out;
-}
+/* Specific styling for the gradient in the LogoIcon */
+.stop-color-light { stop-color: #a5b4fc; }
+.stop-color-dark { stop-color: #4f46e5; }
+.stroke-light { stroke: #a5b4fc; }
+.dark .stop-color-dark-start { stop-color: #c4b5fd; }
+.dark .stop-color-dark-end { stop-color: #6366f1; }
+.dark .stroke-dark-start { stroke: #c4b5fd; }
 
 /* Modal animations */
 @keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 @keyframes slideInUp {
-  0% {
-    transform: translateY(30px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  0% { transform: translateY(30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes fadeInUp {
-  0% {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 
 /* Modal animation classes */
@@ -252,4 +120,24 @@
 
 .animate-fadeInUp {
   animation: fadeInUp 0.5s ease-out;
+}
+
+/* Additional visible animations */
+@keyframes slide-in-left {
+  0% { transform: translateX(-100px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-in-right {
+  0% { transform: translateX(100px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+/* Apply animations to elements */
+.slide-in-left {
+  animation: slide-in-left 1s ease-out;
+}
+
+.slide-in-right {
+  animation: slide-in-right 1s ease-out;
 }
