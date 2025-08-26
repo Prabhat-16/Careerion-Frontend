@@ -1,23 +1,43 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+const defaultTheme = require('tailwindcss/defaultTheme');
+
+module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class', // This enables the dark mode feature
+  darkMode: 'class',
   theme: {
+    fontFamily: {
+      sans: ['Inter var', 'Inter', ...defaultTheme.fontFamily.sans],
+      display: ['Cal Sans', 'Inter var', ...defaultTheme.fontFamily.sans],
+      heading: ['Cal Sans', 'Inter var', ...defaultTheme.fontFamily.sans],
+      mono: ['Roboto Mono', ...defaultTheme.fontFamily.mono],
+    },
     extend: {
+      backdropBlur: {
+        xs: '2px',
+      },
       colors: {
-        // Light theme transparency colors
+        // Modern color palette with transparency
         'glass': {
-          50: 'rgba(255, 255, 255, 0.05)',
-          100: 'rgba(255, 255, 255, 0.1)',
-          200: 'rgba(255, 255, 255, 0.2)',
-          300: 'rgba(255, 255, 255, 0.3)',
-          400: 'rgba(255, 255, 255, 0.4)',
-          500: 'rgba(255, 255, 255, 0.5)',
-          600: 'rgba(255, 255, 255, 0.6)',
-          700: 'rgba(255, 255, 255, 0.7)',
+          light: 'rgba(255, 255, 255, 0.7)',
+          dark: 'rgba(17, 24, 39, 0.7)',
+        },
+        primary: {
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+        },
+        // Dark theme transparency colors
+        'dark-glass': {
           800: 'rgba(255, 255, 255, 0.8)',
           900: 'rgba(255, 255, 255, 0.9)',
         },
