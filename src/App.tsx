@@ -127,8 +127,83 @@ const VideoBackground: FC<VideoBackgroundProps> = ({ theme }) => ( <div classNam
 const Navbar: FC = () => { const { theme, toggleTheme, currentUser, logout, openModal } = useAppContext(); return ( <nav className={`w-full p-4 flex justify-between items-center mb-4 ${theme === 'light' ? 'glass-effect' : 'dark-glass-effect'}`}><div className="flex items-center space-x-3"><LogoIcon /><h1 className="text-2xl font-bold tracking-wide text-slate-800 dark:text-white"><span className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">C</span>areerion</h1></div><div className="flex items-center space-x-2 sm:space-x-4"><button onClick={toggleTheme} className="p-2 rounded-full text-slate-700 dark:text-gray-200 hover:bg-black/10 dark:hover:bg-white/10 transition-colors">{theme === 'light' ? <MoonIcon /> : <SunIcon />}</button>{currentUser ? ( <><span className="text-sm text-slate-700 dark:text-gray-300">Welcome, {currentUser.name.split(' ')[0]}</span><button onClick={logout} className="px-5 py-2 rounded-lg text-sm font-semibold bg-slate-200 text-slate-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600 transition-colors">Log out</button></> ) : ( <><button onClick={() => openModal('signup')} className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-semibold border border-indigo-500 hover:bg-indigo-700 transition-colors">Sign up</button><button onClick={() => openModal('login')} className="px-5 py-2 rounded-lg text-sm font-semibold bg-slate-200 text-slate-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600 transition-colors">Log in</button></> )}</div></nav> ); };
 const MainContent: FC = () => {
   const { theme } = useAppContext();
+  const [isThinking, setIsThinking] = useState(true);
+  const [recommendation, setRecommendation] = useState('');
+  const recommendations = [
+    'AI Ethicist',
+    'Quantum Computing Scientist',
+    'Bio-Integration Specialist',
+    'Neural Interface Designer',
+    'Fusion Energy Technician'
+  ];
+
+  useEffect(() => {
+    // Simulate AI thinking and recommending
+    const interval = setInterval(() => {
+      setIsThinking(true);
+      
+      setTimeout(() => {
+        const randomIndex = Math.floor(Math.random() * recommendations.length);
+        setRecommendation(recommendations[randomIndex]);
+        setIsThinking(false);
+      }, 1500);
+      
+    }, 5000);
+    
+     setTimeout(() => {
+        const randomIndex = Math.floor(Math.random() * recommendations.length);
+        setRecommendation(recommendations[randomIndex]);
+        setIsThinking(false);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="w-full lg:w-1/2 p-6 flex flex-col justify-center slide-in-left">
+      
+      {/* --- ROBOT IMAGE CONTAINER --- */}
+      <div className="relative w-full max-w-sm h-96 mx-auto mb-4">
+        
+        {/* The Robot Image */}
+        <img 
+          // IMPORTANT: Replace this with the path to your robot image!
+          src="/images/futuristic-robot.png" 
+          alt="Futuristic AI Career Coach"
+          className="w-full h-full object-contain animate-float"
+          style={{
+            animationDuration: '6s',
+            // This adds a subtle glow that matches the theme
+            filter: 'drop-shadow(0 0 15px rgba(100, 150, 255, 0.3))'
+          }}
+        />
+
+        {/* Holographic Recommendation Display (HTML overlay) */}
+        <div className="absolute top-[75%] left-1/2 -translate-x-1/2 w-64 h-24 flex items-center justify-center pointer-events-none">
+          <div className="relative w-full h-full text-center flex items-center justify-center">
+            {/* Thinking Animation */}
+            {isThinking ? (
+                <div className="flex space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" style={{ animationDelay: '0s' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                </div>
+            ) : (
+                // Recommendation Text
+                <div className="animate-fade-in px-4">
+                  <p 
+                    className="text-xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-400 dark:from-indigo-300 dark:to-cyan-300"
+                    style={{ textShadow: '0 0 15px rgba(100, 150, 255, 0.5)'}}
+                  >
+                    {recommendation}
+                  </p>
+                </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {/* Original Content */}
       <h1 
         className="text-5xl md:text-6xl font-bold leading-tight glass-text" 
         style={{
