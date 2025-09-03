@@ -161,22 +161,27 @@ const MainContent: FC = () => {
 
   return (
     <div className="w-full lg:w-1/2 p-4 flex flex-col min-h-0">
-      <div className="flex flex-col items-center py-4">
-        {/* Robot Image Container - More compact */}
-        <div className="relative w-full max-w-[240px] h-48 mx-auto mb-4">
-          {/* The Robot Image */}
-          <img 
-            src="/images/my-robot.png" 
-            alt="Futuristic AI Career Coach"
-            className="w-full h-full object-contain animate-float"
-            style={{
-              animationDuration: '6s',
-              filter: 'drop-shadow(0 0 15px rgba(100, 150, 255, 0.3))',
-              maxHeight: '100%',
-              transform: 'scale(0.9)'
-            }}
-          />
-
+      <div className="flex flex-col items-center pt-0 pb-8 -mt-12">
+        {/* Video Container with Glass Effect - Extra Large */}
+        <div className="relative w-full max-w-[480px] mx-auto mb-4 rounded-2xl overflow-hidden glass-panel">
+          <div className="relative z-10 p-2 rounded-2xl overflow-hidden">
+            <video 
+              autoPlay 
+              loop 
+              muted 
+              playsInline
+              className="w-full h-auto rounded-xl shadow-2xl"
+              style={{
+                filter: 'drop-shadow(0 10px 30px rgba(99, 102, 241, 0.5))',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+            >
+              <source src="/videos/Robot-2.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          {/* Enhanced glass overlay effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/15 backdrop-blur-sm rounded-2xl pointer-events-none" />
         </div>
 
         {/* Text Content - Closer to robot */}
