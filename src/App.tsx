@@ -160,69 +160,62 @@ const MainContent: FC = () => {
   }, []);
 
   return (
-    <div className="w-full lg:w-1/2 p-6 flex flex-col justify-center slide-in-left">
-      
-      {/* --- ROBOT IMAGE CONTAINER --- */}
-      <div className="relative w-full max-w-sm h-96 mx-auto mb-4">
-        
-        {/* The Robot Image */}
-        <img 
-          // IMPORTANT: Replace this with the path to your robot image!
-          src="/images/futuristic-robot.png" 
-          alt="Futuristic AI Career Coach"
-          className="w-full h-full object-contain animate-float"
-          style={{
-            animationDuration: '6s',
-            // This adds a subtle glow that matches the theme
-            filter: 'drop-shadow(0 0 15px rgba(100, 150, 255, 0.3))'
-          }}
-        />
+    <div className="w-full lg:w-1/2 p-4 flex flex-col min-h-0">
+      <div className="flex flex-col items-center py-4">
+        {/* Robot Image Container - More compact */}
+        <div className="relative w-full max-w-[240px] h-48 mx-auto mb-4">
+          {/* The Robot Image */}
+          <img 
+            src="/images/my-robot.png" 
+            alt="Futuristic AI Career Coach"
+            className="w-full h-full object-contain animate-float"
+            style={{
+              animationDuration: '6s',
+              filter: 'drop-shadow(0 0 15px rgba(100, 150, 255, 0.3))',
+              maxHeight: '100%',
+              transform: 'scale(0.9)'
+            }}
+          />
 
-        {/* Holographic Recommendation Display (HTML overlay) */}
-        <div className="absolute top-[75%] left-1/2 -translate-x-1/2 w-64 h-24 flex items-center justify-center pointer-events-none">
-          <div className="relative w-full h-full text-center flex items-center justify-center">
-            {/* Thinking Animation */}
-            {isThinking ? (
-                <div className="flex space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" style={{ animationDelay: '0s' }}></div>
-                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                </div>
-            ) : (
-                // Recommendation Text
-                <div className="animate-fade-in px-4">
-                  <p 
-                    className="text-xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-400 dark:from-indigo-300 dark:to-cyan-300"
-                    style={{ textShadow: '0 0 15px rgba(100, 150, 255, 0.5)'}}
-                  >
-                    {recommendation}
-                  </p>
-                </div>
-            )}
-          </div>
+        </div>
+
+        {/* Text Content - Closer to robot */}
+        <div className="text-center z-10 mt-4">
+          <h1 
+            className="text-3xl sm:text-4xl font-bold leading-tight" 
+            style={{
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+              color: theme === 'light' ? 'rgba(79, 70, 229, 0.95)' : 'white',
+              marginBottom: '0.5rem',
+              lineHeight: '1.2'
+            }}
+          >
+            Elevate Your Professional Journey
+          </h1>
+          <h2 
+            className="text-2xl sm:text-3xl font-bold mb-2" 
+            style={{ 
+              color: theme === 'light' ? 'rgba(99, 102, 241, 0.95)' : '#a5b4fc',
+              lineHeight: '1.2',
+              marginBottom: '0.75rem'
+            }}
+          >
+            Strategic Career Development
+          </h2>
+          <p 
+            className="text-base sm:text-lg text-slate-700 dark:text-gray-200 mt-2 px-4"
+            style={{
+              textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+              maxWidth: '500px',
+              margin: '0 auto',
+              lineHeight: '1.4',
+              fontWeight: '500'
+            }}
+          >
+            AI-powered career guidance for professionals
+          </p>
         </div>
       </div>
-      
-      {/* Original Content */}
-      <h1 
-        className="text-5xl md:text-6xl font-bold leading-tight glass-text" 
-        style={{
-          textShadow: '1px 1px 10px rgba(0,0,0,0.3)',
-          color: theme === 'light' ? 'rgba(96, 165, 250, 0.9)' : 'white'
-        }}
-      >
-        Beyond the Job Board.<br />
-        <span style={{ color: theme === 'light' ? 'rgba(99, 102, 241, 0.9)' : 'white' }}>
-          Discover Your True Potential.
-        </span>
-      </h1>
-      <p 
-        className="mt-8 text-lg text-slate-600 dark:text-gray-300" 
-        style={{textShadow: '1px 1px 5px rgba(0,0,0,0.3)'}}
-      >
-        Whether you're a student, a graduate, or a professional, our AI-powered coach <br /> 
-        helps you discover and navigate the career you were meant for.
-      </p>
     </div>
   );
 };

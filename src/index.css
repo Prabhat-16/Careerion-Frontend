@@ -11,6 +11,53 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Animations */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes scan {
+  0% { transform: translateY(-100%); opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { transform: translateY(200%); opacity: 0.8; }
+}
+
+@keyframes data-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-blink {
+  animation: blink 2s ease-in-out infinite;
+}
+
+.animate-scan {
+  animation: scan 2s linear infinite;
+}
+
+.animate-data-pulse {
+  animation: data-pulse 1.5s ease-in-out infinite;
+}
+
 @layer base {
   :root {
     --font-heading: 'Space Grotesk', system-ui, -apple-system, sans-serif;
