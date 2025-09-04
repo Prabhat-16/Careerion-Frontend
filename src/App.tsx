@@ -176,7 +176,7 @@ const MainContent: FC = () => {
                 border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
             >
-              <source src="/videos/Robot.mp4" type="video/mp4" />
+              <source src="/videos/Robot-3.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
