@@ -19,44 +19,44 @@ const API_URL = 'http://localhost:5001/api';
 
 // --- TypeScript Interfaces ---
 interface Message {
-    sender: 'user' | 'ai';
-    text: string;
+  sender: 'user' | 'ai';
+  text: string;
 }
 interface User {
-    _id: string;
-    name: string;
-    email: string;
+  _id: string;
+  name: string;
+  email: string;
 }
 interface VideoBackgroundProps {
-    theme: string;
+  theme: string;
 }
 interface CareerRecommendation {
-    title: string;
-    description: string;
-    key_skills: string[];
+  title: string;
+  description: string;
+  key_skills: string[];
 }
 interface ProfileFormData {
-    skills: string;
-    interests: string;
+  skills: string;
+  interests: string;
 }
 
 // --- Context for Global State Management ---
 interface AppContextType {
-    theme: string;
-    currentUser: User | null;
-    isLoadingAuth: boolean;
-    toggleTheme: () => void;
-    openModal: (mode: 'login' | 'signup') => void;
-    logout: () => void;
-    login: (user: User, token: string) => void;
+  theme: string;
+  currentUser: User | null;
+  isLoadingAuth: boolean;
+  toggleTheme: () => void;
+  openModal: (mode: 'login' | 'signup') => void;
+  logout: () => void;
+  login: (user: User, token: string) => void;
 }
 const AppContext = createContext<AppContextType | undefined>(undefined);
 const useAppContext = () => {
-    const context = useContext(AppContext);
-    if (context === undefined) {
-        throw new Error('useAppContext must be used within an AppProvider');
-    }
-    return context;
+  const context = useContext(AppContext);
+  if (context === undefined) {
+    throw new Error('useAppContext must be used within an AppProvider');
+  }
+  return context;
 };
 
 // --- SVG Icons ---
@@ -123,11 +123,83 @@ const ArrowLeftIcon: FC<IconProps> = ({ className = '' }) => (
 const TypingIndicator: FC = () => ( <div className="flex items-center space-x-1.5"><div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div><div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: '0.2s' }}></div><div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: '0.4s' }}></div></div> );
 
 // --- Reusable Components ---
-const VideoBackground: FC<VideoBackgroundProps> = ({ theme }) => ( <div className={`absolute top-0 left-0 w-full h-full -z-10 transition-all duration-500 ${ theme === 'light' ? 'bg-gradient-to-br from-slate-50 to-white' : 'bg-gradient-to-br from-gray-800 via-gray-900 to-black' }`}></div> );
-const Navbar: FC = () => { const { theme, toggleTheme, currentUser, logout, openModal } = useAppContext(); return ( <nav className={`w-full p-4 flex justify-between items-center mb-4 ${theme === 'light' ? 'glass-effect' : 'dark-glass-effect'}`}><div className="flex items-center space-x-3"><LogoIcon /><h1 className="text-2xl font-bold tracking-wide text-slate-800 dark:text-white"><span className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">C</span>areerion</h1></div><div className="flex items-center space-x-2 sm:space-x-4"><button onClick={toggleTheme} className="p-2 rounded-full text-slate-700 dark:text-gray-200 hover:bg-black/10 dark:hover:bg-white/10 transition-colors">{theme === 'light' ? <MoonIcon /> : <SunIcon />}</button>{currentUser ? ( <><span className="text-sm text-slate-700 dark:text-gray-300">Welcome, {currentUser.name.split(' ')[0]}</span><button onClick={logout} className="px-5 py-2 rounded-lg text-sm font-semibold bg-slate-200 text-slate-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600 transition-colors">Log out</button></> ) : ( <><button onClick={() => openModal('signup')} className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-semibold border border-indigo-500 hover:bg-indigo-700 transition-colors">Sign up</button><button onClick={() => openModal('login')} className="px-5 py-2 rounded-lg text-sm font-semibold bg-slate-200 text-slate-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600 transition-colors">Log in</button></> )}</div></nav> ); };
+
+// UPDATED: This component now renders the full-screen video background
+const VideoBackground: FC<VideoBackgroundProps> = ({ theme }) => {
+  return (
+    <div className="absolute top-0 left-0 w-full h-full -z-10 overflow-hidden">
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="w-full h-full object-cover"
+      >
+        <source src="/videos/Robot-3.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <div className="absolute inset-0 bg-black/50"></div>
+    </div>
+  );
+};
+
+const Navbar: FC = () => { 
+  const { theme, toggleTheme, currentUser, logout, openModal } = useAppContext(); 
+  
+  return ( 
+    // This className now has the frosted glass styles
+    <nav className="w-full p-4 flex justify-between items-center mb-4 bg-white/20 dark:bg-slate-900/30 backdrop-blur-lg border-b border-white/20 dark:border-slate-700">
+      <div className="flex items-center space-x-3">
+        <LogoIcon />
+        <h1 className="text-2xl font-bold tracking-wide text-slate-800 dark:text-white">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">C</span>areerion
+        </h1>
+      </div>
+
+      <div className="flex items-center space-x-2 sm:space-x-4">
+        <button 
+          onClick={toggleTheme} 
+          className="p-2 rounded-full text-slate-700 dark:text-gray-200 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+        >
+          {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+        </button>
+
+        {currentUser ? ( 
+          <>
+            <span className="text-sm text-slate-700 dark:text-gray-300 hidden sm:block">
+              Welcome, {currentUser.name.split(' ')[0]}
+            </span>
+            <button 
+              onClick={logout} 
+              className="px-5 py-2 rounded-lg text-sm font-semibold bg-slate-200 text-slate-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600 transition-colors"
+            >
+              Log out
+            </button>
+          </> 
+        ) : ( 
+          <>
+            <button 
+              onClick={() => openModal('signup')} 
+              className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-semibold border border-indigo-500 hover:bg-indigo-700 transition-colors"
+            >
+              Sign up
+            </button>
+            <button 
+              onClick={() => openModal('login')} 
+              className="px-5 py-2 rounded-lg text-sm font-semibold bg-slate-200 text-slate-800 hover:bg-slate-300 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600 transition-colors"
+            >
+              Log in
+            </button>
+          </> 
+        )}
+      </div>
+    </nav> 
+  ); 
+};
+
+// UPDATED: This component no longer contains the video panel
 const MainContent: FC = () => {
-  const { theme } = useAppContext();
-  const [isThinking, setIsThinking] = useState(true);
+  // This state logic is not used for rendering, you can remove it if you wish.
   const [recommendation, setRecommendation] = useState('');
   const recommendations = [
     'AI Ethicist',
@@ -138,84 +210,38 @@ const MainContent: FC = () => {
   ];
 
   useEffect(() => {
-    // Simulate AI thinking and recommending
     const interval = setInterval(() => {
-      setIsThinking(true);
-      
       setTimeout(() => {
         const randomIndex = Math.floor(Math.random() * recommendations.length);
         setRecommendation(recommendations[randomIndex]);
-        setIsThinking(false);
       }, 1500);
-      
     }, 5000);
     
-     setTimeout(() => {
-        const randomIndex = Math.floor(Math.random() * recommendations.length);
-        setRecommendation(recommendations[randomIndex]);
-        setIsThinking(false);
+    setTimeout(() => {
+      const randomIndex = Math.floor(Math.random() * recommendations.length);
+      setRecommendation(recommendations[randomIndex]);
     }, 2000);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="w-full lg:w-1/2 p-4 flex flex-col min-h-0">
-      <div className="flex flex-col items-center pt-8 pb-8 -mt-4">
-        {/* Video Container with Glass Effect - Extra Large */}
-        <div className="relative w-full max-w-[480px] mx-auto mb-4 rounded-2xl overflow-hidden glass-panel">
-          <div className="relative z-10 p-2 rounded-2xl overflow-hidden">
-            <video 
-              autoPlay 
-              loop 
-              muted 
-              playsInline
-              className="w-full h-auto rounded-xl shadow-2xl"
-              style={{
-                filter: 'drop-shadow(0 10px 30px rgba(99, 102, 241, 0.5))',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
-              }}
-            >
-              <source src="/videos/Robot-3.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-          {/* Enhanced glass overlay effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/15 backdrop-blur-sm rounded-2xl pointer-events-none" />
-        </div>
-
-        {/* Text Content - Closer to robot */}
-        <div className="text-center z-10 mt-4">
+    <div className="w-full lg:w-1/2 p-4 flex flex-col justify-center items-center min-h-0">
+      {/* The text is now inside a "glass-panel" for perfect visibility */}
+      <div className="glass-panel w-full max-w-2xl">
+        <div className="glass-panel-inner text-center">
           <h1 
-            className="text-3xl sm:text-4xl font-bold leading-tight" 
-            style={{
-              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-              color: theme === 'light' ? 'rgba(79, 70, 229, 0.95)' : 'white',
-              marginBottom: '0.5rem',
-              lineHeight: '1.2'
-            }}
+            className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tighter mb-4 text-gradient"
           >
             Elevate Your Professional Journey
           </h1>
           <h2 
-            className="text-2xl sm:text-3xl font-bold mb-2" 
-            style={{ 
-              color: theme === 'light' ? 'rgba(99, 102, 241, 0.95)' : '#a5b4fc',
-              lineHeight: '1.2',
-              marginBottom: '0.75rem'
-            }}
+            className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-700 dark:text-indigo-200 mb-6"
           >
             Strategic Career Development
           </h2>
           <p 
-            className="text-base sm:text-lg text-slate-700 dark:text-gray-200 mt-2 px-4"
-            style={{
-              textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-              maxWidth: '500px',
-              margin: '0 auto',
-              lineHeight: '1.4',
-              fontWeight: '500'
-            }}
+            className="text-lg sm:text-xl text-slate-600 dark:text-gray-300 max-w-xl mx-auto leading-relaxed font-medium"
           >
             AI-powered career guidance for professionals
           </p>
@@ -224,6 +250,7 @@ const MainContent: FC = () => {
     </div>
   );
 };
+
 const CareerCoach: FC = () => { 
   const { theme } = useAppContext(); 
   const [messages, setMessages] = useState<Message[]>([]); 
@@ -289,14 +316,13 @@ const CareerCoach: FC = () => {
 
   const cleanResponseText = (text: string) => {
     if (!text) return '';
-    // Remove markdown formatting (bold, italic, etc.)
     return text
-      .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove **bold**
-      .replace(/\*(.*?)\*/g, '$1')      // Remove *italic*
-      .replace(/```[\s\S]*?```/g, '')    // Remove code blocks
-      .replace(/`(.*?)`/g, '$1')        // Remove `code`
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove [links](url)
-      .replace(/\n\s*\n/g, '\n')      // Remove extra newlines
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/`(.*?)`/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/\n\s*\n/g, '\n')
       .trim();
   };
 
@@ -550,7 +576,6 @@ const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, initialMode }) => {
                     type="button" 
                     className="text-xs text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                     onClick={() => {
-                      // TODO: Implement forgot password functionality
                       setError('Password reset functionality coming soon!');
                     }}
                   >
@@ -588,7 +613,7 @@ const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, initialMode }) => {
                   <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                  </svg>
                   {mode === 'login' ? 'Signing in...' : 'Creating account...'}
                 </>
               ) : mode === 'login' ? 'Sign in' : 'Sign up'}
