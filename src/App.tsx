@@ -161,7 +161,7 @@ const MainContent: FC = () => {
 
   return (
     <div className="w-full lg:w-1/2 p-4 flex flex-col min-h-0">
-      <div className="flex flex-col items-center pt-0 pb-8 -mt-12">
+      <div className="flex flex-col items-center pt-8 pb-8 -mt-4">
         {/* Video Container with Glass Effect - Extra Large */}
         <div className="relative w-full max-w-[480px] mx-auto mb-4 rounded-2xl overflow-hidden glass-panel">
           <div className="relative z-10 p-2 rounded-2xl overflow-hidden">
@@ -176,7 +176,7 @@ const MainContent: FC = () => {
                 border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
             >
-              <source src="/videos/Robot-2.mp4" type="video/mp4" />
+              <source src="/videos/Robot.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
@@ -294,9 +294,9 @@ const CareerCoach: FC = () => {
       .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove **bold**
       .replace(/\*(.*?)\*/g, '$1')      // Remove *italic*
       .replace(/```[\s\S]*?```/g, '')    // Remove code blocks
-      .replace(/`(.*?)`/g, '$1')         // Remove `code`
+      .replace(/`(.*?)`/g, '$1')        // Remove `code`
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove [links](url)
-      .replace(/\n\s*\n/g, '\n')       // Remove extra newlines
+      .replace(/\n\s*\n/g, '\n')      // Remove extra newlines
       .trim();
   };
 
@@ -311,7 +311,7 @@ const CareerCoach: FC = () => {
 
   return ( 
     <div className="w-full lg:w-1/2 p-6 flex items-center justify-center slide-in-right">
-      <div className="glass-panel w-full max-w-md h-[70vh] flex flex-col rounded-2xl overflow-hidden">
+      <div className="glass-panel w-full max-w-md h-[70vh] flex flex-col rounded-2xl overflow-hidden border-2 border-indigo-300 dark:border-indigo-500 transition-colors">
         <div className="glass-panel-inner flex flex-col h-full">
           <div className="flex items-center justify-center relative p-4 border-b border-white/20 flex-shrink-0">
             {isChatting && (
