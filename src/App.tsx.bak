@@ -1,0 +1,122 @@
+import { useState, useEffect, useRef, createContext, useContext } from 'react';
+import type { FC, ReactNode } from 'react';
+import axios from 'axios';
+import { BrowserRouter, Routes, Route, Outlet, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
+import { CircularProgress } from '@mui/material';
+import './index.css';
+import UserProfilePage from './pages/UserProfilePage';
+
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
+// ... (rest of the code remains the same)
+
+const ProtectedRoute: FC<{ element: ReactNode }> = ({ element }) => {
+  const { currentUser, isLoadingAuth } = useAppContext();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isCheckingProfile, setIsCheckingProfile] = useState(true);
+  const [profileComplete, setProfileComplete] = useState(false);
+
+  // List of routes where profile completion is not required
+  const publicRoutes = ['/profile'];
+  const isPublicRoute = publicRoutes.includes(location.pathname);
+
+  useEffect(() => {
+    const checkProfile = async () => {
+      if (!currentUser) {
+        navigate('/');
+        return;
+      }
+
+      // If it's a public route, we don't need to check profile status
+      if (isPublicRoute) {
+        setIsCheckingProfile(false);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${API_URL}/user/profile/status`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setProfileComplete(response.data.profileComplete);
+      } catch (error) {
+        console.error('Error checking profile status:', error);
+        // If there's an error, assume profile is not complete
+        setProfileComplete(false);
+      } finally {
+        setIsCheckingProfile(false);
+      }
+    };
+
+    if (currentUser) {
+      checkProfile();
+    }
+  }, [currentUser, navigate, isPublicRoute]);
+
+  if (isLoadingAuth || (currentUser && isCheckingProfile && !isPublicRoute)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return <Navigate to="/" />;
+  }
+
+  // If profile is not complete and not on the profile page, redirect to profile
+  if (!profileComplete && !isPublicRoute) {
+    return <Navigate to="/profile" state={{ from: location }} replace />;
+  }
+
+  return <>{element}</>;
+};
+
+const AppLayout: FC = () => {
+  const location = useLocation();
+  const isProfilePage = location.pathname === '/profile';
+  
+  return (
+    <div className={`min-h-screen ${isProfilePage ? 'bg-gray-50 dark:bg-gray-900' : 'bg-white dark:bg-gray-900'}`}>
+      {!isProfilePage && <Navbar />}
+      <Outlet />
+    </div>
+  );
+};
+
+const App: FC = () => {
+  return (
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
+      <AppProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route element={<AppLayout />}>
+              <Route path="/profile" element={
+                <ProtectedRoute element={<UserProfilePage />} />
+              } />
+              <Route path="/dashboard" element={
+                <ProtectedRoute element={<DashboardPage />} />
+              } />
+              <Route path="/career-coach" element={
+                <ProtectedRoute element={<CareerCoach />} />
+              } />
+              <Route path="/recommendations" element={
+                <ProtectedRoute element={<RecommendationsDisplay recommendations={[]} />} />
+              } />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AppProvider>
+    </GoogleOAuthProvider>
+  );
+};
+
+export default App;
