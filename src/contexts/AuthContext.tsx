@@ -12,7 +12,7 @@ type User = {
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  login: () => void;
+  login: (credentialResponse: CredentialResponse) => Promise<void>;
   logout: () => void;
 };
 
@@ -21,12 +21,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const api = axios.create({
+    baseURL: import.meta.env.VITE_API_URL || '',
+    withCredentials: true,
+  });
 
   useEffect(() => {
     // Check if user is already logged in
     const checkAuth = async () => {
       try {
-        const response = await axios.get('/api/auth/me', { withCredentials: true });
+        const response = await api.get('/auth/me');
         setUser(response.data);
       } catch (error) {
         console.error('Not authenticated');
@@ -40,9 +44,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const handleLoginSuccess = async (credentialResponse: CredentialResponse) => {
     try {
-      const response = await axios.post('/api/auth/google', {
+      const response = await api.post('/auth/google', {
         token: credentialResponse.credential
-      }, { withCredentials: true });
+      });
       
       setUser(response.data.user);
     } catch (error) {
@@ -52,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post('/api/auth/logout', {}, { withCredentials: true });
+      await api.post('/auth/logout', {});
       googleLogout();
       setUser(null);
     } catch (error) {
@@ -63,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const value = {
     user,
     loading,
-    login: () => {},
+    login: handleLoginSuccess,
     logout: handleLogout,
   };
 
@@ -85,9 +89,10 @@ export const useAuth = () => {
 };
 
 export const GoogleLoginButton = () => {
+  const { login } = useAuth();
   return (
     <GoogleLogin
-      onSuccess={handleLoginSuccess}
+      onSuccess={login}
       onError={() => {
         console.error('Login Failed');
       }}
