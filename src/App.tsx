@@ -430,7 +430,81 @@ const CareerCoach: FC = () => {
 const RecommendationsDisplay: FC<{ recommendations: CareerRecommendation[] }> = ({ recommendations }) => { return ( <div className="w-full max-w-4xl mx-auto"><h2 className="text-3xl font-bold glass-text mb-8">Here are your recommended career paths:</h2><div className="grid md:grid-cols-3 gap-6">{recommendations.map((rec, index) => ( <div key={index} className="p-6 rounded-2xl glass-effect dark-glass-effect"><h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">{rec.title}</h3><p className="text-slate-600 dark:text-gray-300 text-sm mb-4">{rec.description}</p><h4 className="font-semibold text-slate-700 dark:text-gray-200 mb-2 text-sm">Key Skills:</h4><ul className="list-disc list-inside text-sm text-slate-600 dark:text-gray-300">{rec.key_skills.map((skill, i) => <li key={i}>{skill}</li>)}</ul></div> ))}</div></div> ); };
 const FollowUpChat: FC<{ initialHistory: Message[] }> = ({ initialHistory }) => { const [messages, setMessages] = useState<Message[]>(initialHistory); const [input, setInput] = useState(''); const [isLoading, setIsLoading] = useState(false); const handleSendMessage = async () => { if (input.trim() === '' || isLoading) return; const userMessage: Message = { sender: 'user', text: input }; const newMessages = [...messages, userMessage]; setMessages(newMessages); setInput(''); setIsLoading(true); const history = newMessages.map(msg => ({ role: msg.sender === 'user' ? 'user' : 'model', parts: [{ text: msg.text }] })); try { const res = await axios.post(`${API_URL}/chat`, { history, message: input }); setMessages(prev => [...prev, { sender: 'ai', text: res.data.response }]); } catch (error) { console.error(error); setMessages(prev => [...prev, { sender: 'ai', text: "Sorry, I ran into an error." }]); } finally { setIsLoading(false); } }; return ( <div className="w-full max-w-4xl mx-auto mt-12"><h2 className="text-3xl font-bold glass-text mb-8 text-center">Have more questions?</h2><div className="p-4 rounded-2xl glass-effect dark-glass-effect"><div className="relative"><input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSendMessage()} placeholder="Ask about these careers..." className="glass-input pr-12 text-slate-800 dark:text-white placeholder-slate-500 dark:placeholder-gray-400" disabled={isLoading} /><button onClick={handleSendMessage} disabled={isLoading} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:bg-indigo-800 transition-colors"><SendIcon /></button></div></div></div> ); };
 const ProfileForm: FC<{ onGetRecommendations: (data: ProfileFormData) => void, isLoading: boolean }> = ({ onGetRecommendations, isLoading }) => { const [formData, setFormData] = useState<ProfileFormData>({ skills: '', interests: '' }); const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => { setFormData({ ...formData, [e.target.name]: e.target.value }); }; const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onGetRecommendations(formData); }; return ( <div className="p-8 md:p-12 rounded-2xl glass-effect dark-glass-effect max-w-2xl mx-auto"><h2 className="text-3xl font-bold glass-text mb-2">Find Your Career Path</h2><p className="text-slate-600 dark:text-gray-300 mb-8">Tell us about yourself, and our AI will suggest careers tailored to you.</p><form onSubmit={handleSubmit} className="space-y-6"><div><label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">Your Skills</label><textarea name="skills" value={formData.skills} onChange={handleChange} placeholder="e.g., Python, React, Public Speaking, Project Management" className="glass-input min-h-[100px] text-slate-800 dark:text-white" required /></div><div><label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">Your Interests</label><textarea name="interests" value={formData.interests} onChange={handleChange} placeholder="e.g., Technology, Healthcare, Art, Finance, Renewable Energy" className="glass-input min-h-[100px] text-slate-800 dark:text-white" required /></div><button type="submit" disabled={isLoading} className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50">{isLoading ? 'Analyzing...' : 'Find My Career Path'}</button></form></div> ); };
-const DashboardPage: FC = () => { const [recommendations, setRecommendations] = useState<CareerRecommendation[] | null>(null); const [initialHistory, setInitialHistory] = useState<Message[]>([]); const [isLoading, setIsLoading] = useState(false); const [error, setError] = useState<string | null>(null); const handleGetRecommendations = async (profileData: ProfileFormData) => { setIsLoading(true); setError(null); const prompt = `Based on the following user profile, recommend 3 career paths. For each path, provide a "title", a "description", and an array of 3 "key_skills". Format the response as a clean JSON array of objects. Do not include any other text or markdown formatting.\nUser Profile:\n- Skills: ${profileData.skills}\n- Interests: ${profileData.interests}`; const historyForChat: Message[] = [{ sender: 'user', text: `Here is my profile for career recommendations:\nSkills: ${profileData.skills}\nInterests: ${profileData.interests}` }]; try { const res = await axios.post(`${API_URL}/chat`, { message: prompt }); const cleanedResponse = res.data.response.replace(/```json/g, '').replace(/```/g, '').trim(); const parsedRecommendations = JSON.parse(cleanedResponse); setRecommendations(parsedRecommendations); historyForChat.push({ sender: 'ai', text: `Based on your profile, here are some recommendations: ${JSON.stringify(parsedRecommendations, null, 2)}`}); setInitialHistory(historyForChat); } catch (err) { console.error("Error parsing AI response:", err); setError("Sorry, we couldn't get recommendations. The AI response might have been in an unexpected format. Please try rephrasing your skills and interests."); } finally { setIsLoading(false); } }; return ( <main className="container mx-auto px-6 py-12 text-center">{!recommendations ? ( <ProfileForm onGetRecommendations={handleGetRecommendations} isLoading={isLoading} /> ) : ( <> <RecommendationsDisplay recommendations={recommendations} /> <FollowUpChat initialHistory={initialHistory} /> </> )}{error && <p className="text-red-500 mt-4">{error}</p>}</main> ); };
+const DashboardPage: FC = () => {
+  const [recommendations, setRecommendations] = useState<CareerRecommendation[] | null>(null);
+  const [initialHistory, setInitialHistory] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Robust extractor for JSON array/object from a possibly noisy string
+  const extractJson = (text: string): any | null => {
+    if (!text) return null;
+    let cleaned = text
+      .replace(/```json[\s\S]*?```/gi, (m) => m.replace(/```json|```/gi, ''))
+      .replace(/```[\s\S]*?```/g, (m) => m.replace(/```/g, ''))
+      .trim();
+    const start = cleaned.search(/[\[{]/);
+    if (start === -1) return null;
+    cleaned = cleaned.slice(start);
+    // Try full parse first
+    try { return JSON.parse(cleaned); } catch {}
+    // Try shrinking from the end
+    for (let i = cleaned.length; i > 0; i--) {
+      const candidate = cleaned.slice(0, i).trim();
+      try { return JSON.parse(candidate); } catch {}
+    }
+    return null;
+  };
+
+  const handleGetRecommendations = async (profileData: ProfileFormData) => {
+    setIsLoading(true);
+    setError(null);
+    const prompt = `Based on the following user profile, recommend 3 career paths. For each path, provide a "title", a "description", and an array of 3 "key_skills". Return ONLY valid JSON (array of objects) with no extra text.\nUser Profile:\n- Skills: ${profileData.skills}\n- Interests: ${profileData.interests}`;
+    const historyForChat: Message[] = [{ sender: 'user', text: `Here is my profile for career recommendations:\nSkills: ${profileData.skills}\nInterests: ${profileData.interests}` }];
+    try {
+      const res = await axios.post(`${API_URL}/chat`, {
+        message: prompt,
+        expectJson: true,
+        systemPrompt: 'Reply with ONLY valid minified JSON (array of objects with keys: title, description, key_skills). No prose, no markdown.',
+      });
+
+      let parsed: any = res.data?.json || null;
+      if (!parsed) {
+        parsed = extractJson(res.data?.response || '');
+      }
+      if (!parsed) throw new Error('No JSON could be extracted');
+
+      // Basic validation
+      if (!Array.isArray(parsed)) throw new Error('Parsed JSON is not an array');
+      const normalized: CareerRecommendation[] = parsed.map((item: any) => ({
+        title: String(item.title || ''),
+        description: String(item.description || ''),
+        key_skills: Array.isArray(item.key_skills) ? item.key_skills.map((s: any) => String(s)) : [],
+      }));
+
+      setRecommendations(normalized);
+      historyForChat.push({ sender: 'ai', text: `Based on your profile, here are some recommendations: ${JSON.stringify(normalized, null, 2)}`});
+      setInitialHistory(historyForChat);
+    } catch (err) {
+      console.error('Error parsing AI response:', err);
+      setError("Sorry, we couldn't get recommendations. The AI response might have been in an unexpected format. Please try rephrasing your skills and interests.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <main className="container mx-auto px-6 py-12 text-center">
+      {!recommendations ? (
+        <ProfileForm onGetRecommendations={handleGetRecommendations} isLoading={isLoading} />
+      ) : (
+        <>
+          <RecommendationsDisplay recommendations={recommendations} />
+          <FollowUpChat initialHistory={initialHistory} />
+        </>
+      )}
+      {error && <p className="
+text-red-500 mt-4">{error}</p>}</main> ); };
 const HomePage: FC = () => { return ( <main className="flex flex-col lg:flex-row container mx-auto px-6 pb-12"><MainContent /><CareerCoach /></main> ); };
 const AppLayout: FC = () => { return ( <div className="relative z-10"><Navbar /><Outlet /></div> ); };
 

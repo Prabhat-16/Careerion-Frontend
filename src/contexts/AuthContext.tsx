@@ -22,8 +22,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || '',
-    withCredentials: true,
+    baseURL: (import.meta.env.VITE_API_URL as string) || 'http://localhost:5001/api',
+  });
+
+  // Attach token automatically if available
+  api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers = config.headers || {};
+      (config.headers as any)['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
   });
 
   useEffect(() => {
@@ -45,9 +54,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const handleLoginSuccess = async (credentialResponse: CredentialResponse) => {
     try {
       const response = await api.post('/auth/google', {
-        token: credentialResponse.credential
+        token: credentialResponse.credential,
       });
-      
+      // Persist token for subsequent authorized requests
+      if (response.data?.token) {
+        localStorage.setItem('token', response.data.token);
+      }
       setUser(response.data.user);
     } catch (error) {
       console.error('Login failed:', error);
@@ -59,6 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await api.post('/auth/logout', {});
       googleLogout();
       setUser(null);
+      localStorage.removeItem('token');
     } catch (error) {
       console.error('Logout failed:', error);
     }
