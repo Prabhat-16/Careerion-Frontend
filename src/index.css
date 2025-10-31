@@ -561,6 +561,25 @@ input[type="radio"] {
   background-color: #4b5563;
 }
 
+/* Google Login Component Styling */
+#google-login-container {
+  width: 100%;
+}
+
+.google-login-button {
+  width: 100% !important;
+  border-radius: 0.5rem !important;
+}
+
+/* Override Google's default button styling */
+div[data-testid="google-login-button"] {
+  width: 100% !important;
+}
+
+iframe[src*="accounts.google.com"] {
+  width: 100% !important;
+}
+
 /* Form elements */
 .modal-body input {
   width: 100%;

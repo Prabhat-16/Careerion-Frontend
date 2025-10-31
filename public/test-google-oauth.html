@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google OAuth Test</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <h1>Google OAuth Configuration Test</h1>
+    <p>Current URL: <span id="current-url"></span></p>
+    <p>Client ID: 159690213613-b2g7hc04u6lfsbsgkemrhb7oq143slmp.apps.googleusercontent.com</p>
+    
+    <div id="g_id_onload"
+         data-client_id="159690213613-b2g7hc04u6lfsbsgkemrhb7oq143slmp.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin" data-type="standard"></div>
+
+    <script>
+        document.getElementById('current-url').textContent = window.location.href;
+        
+        function handleCredentialResponse(response) {
+            console.log("Encoded JWT ID token: " + response.credential);
+            alert("Google OAuth Success! Check console for details.");
+        }
+    </script>
+    
+    <h2>Instructions:</h2>
+    <ol>
+        <li>Open this file in a browser from: <code>http://localhost:3003/test-google-oauth.html</code></li>
+        <li>If Google Sign-In button appears, the configuration is correct</li>
+        <li>If you get "redirect_uri_mismatch", add the current URL to Google Cloud Console</li>
+    </ol>
+    
+    <h3>Add these URLs to Google Cloud Console:</h3>
+    <ul>
+        <li>Authorized JavaScript origins: <code>http://localhost:3003</code></li>
+        <li>Authorized redirect URIs: <code>http://localhost:3003</code></li>
+    </ul>
+</body>
+</html>

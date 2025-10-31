@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, createContext, useContext } from 'react';
 import type { FC, ReactNode } from 'react';
 import axios from 'axios';
 import { BrowserRouter, Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
-import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider, useGoogleLogin, GoogleLogin } from '@react-oauth/google';
 import './index.css';
 
 declare global {
@@ -532,10 +532,33 @@ const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, initialMode }) => {
 
   const { login } = useAppContext();
 
+  // Handler for GoogleLogin component (ID token flow)
+  const handleGoogleLoginSuccess = async (credentialResponse: any) => {
+    try {
+      setIsLoading(true);
+      console.log('Google Login Success (ID Token):', credentialResponse);
+      const res = await axios.post(`${API_URL}/auth/google`, { 
+        token: credentialResponse.credential, 
+      }); 
+      login(res.data.user, res.data.token); 
+      onClose(); 
+    } catch (err) { 
+      setError('Google Sign-In failed. Please try again.'); 
+      console.error('Google Login Error:', err); 
+    } finally { 
+      setIsLoading(false); 
+    } 
+  };
+
+  // Handler for useGoogleLogin hook (access token flow)
   const handleGoogleSignIn = useGoogleLogin({ 
+    scope: 'openid email profile',
+    prompt: 'select_account',
+    include_granted_scopes: true,
     onSuccess: async (tokenResponse) => { 
       try { 
         setIsLoading(true); 
+        console.log('Google OAuth Success (Access Token):', tokenResponse);
         const res = await axios.post(`${API_URL}/auth/google`, { 
           token: tokenResponse.access_token, 
         }); 
@@ -543,12 +566,13 @@ const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, initialMode }) => {
         onClose(); 
       } catch (err) { 
         setError('Google Sign-In failed. Please try again.'); 
-        console.error(err); 
+        console.error('Google Auth Error:', err); 
       } finally { 
         setIsLoading(false); 
       } 
     }, 
-    onError: () => { 
+    onError: (error) => { 
+      console.error('Google OAuth Error:', error);
       setError('Google Sign-In failed. Please try again.'); 
     } 
   }); 
@@ -695,17 +719,38 @@ const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, initialMode }) => {
               </div>
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 space-y-3">
+              {/* Primary Google Login Component - Better for account selection */}
+              <div className="w-full">
+                <GoogleLogin
+                  onSuccess={handleGoogleLoginSuccess}
+                  onError={() => {
+                    console.error('Google Login Failed');
+                    setError('Google Sign-In failed. Please try again.');
+                  }}
+                  useOneTap={false}
+                  context={mode === 'login' ? 'signin' : 'signup'}
+                  text={mode === 'login' ? 'signin_with' : 'signup_with'}
+                  shape="rectangular"
+                  theme="outline"
+                  size="large"
+                  width="100%"
+                  auto_select={false}
+                />
+              </div>
+              
+              {/* Fallback Custom Button */}
               <button
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   handleGoogleSignIn();
                 }}
-                className="btn-google"
+                className="btn-google w-full"
+                disabled={isLoading}
               >
                 <GoogleIcon className="h-5 w-5" />
-                <span>{mode === 'login' ? 'Sign in with Google' : 'Sign up with Google'}</span>
+                <span>{mode === 'login' ? 'Alternative Sign in with Google' : 'Alternative Sign up with Google'}</span>
               </button>
             </div>
 
@@ -819,7 +864,11 @@ export default function AppWrapper() {
     }
 
     return (
-        <GoogleOAuthProvider clientId={googleClientId}>
+        <GoogleOAuthProvider 
+            clientId={googleClientId}
+            onScriptLoadError={() => console.error('Google OAuth script failed to load')}
+            onScriptLoadSuccess={() => console.log('Google OAuth script loaded successfully')}
+        >
             <BrowserRouter>
                 <AppProvider>
                     <Routes>
