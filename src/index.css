@@ -580,6 +580,112 @@ iframe[src*="accounts.google.com"] {
   width: 100% !important;
 }
 
+/* Chat Message Styling */
+.chat-message {
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 0.875rem;
+  overflow: hidden;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chat-message p {
+  margin-bottom: 0.75rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.chat-message p:last-child {
+  margin-bottom: 0;
+}
+
+/* Ensure long words break properly */
+.chat-message * {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+
+/* Better spacing for lists in chat */
+.chat-message ul, .chat-message ol {
+  margin: 0.5rem 0;
+  padding-left: 1.25rem;
+}
+
+.chat-message li {
+  margin-bottom: 0.25rem;
+}
+
+/* Override glass-card padding for chat messages */
+.chat-message.glass-card {
+  padding: 1rem !important;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+/* Chat input textarea styling */
+.glass-input[rows] {
+  resize: none;
+  overflow-y: auto;
+  line-height: 1.5;
+  font-family: inherit;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.glass-input[rows]::-webkit-scrollbar {
+  width: 4px;
+}
+
+.glass-input[rows]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.glass-input[rows]::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.3);
+  border-radius: 2px;
+}
+
+.glass-input[rows]::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.5);
+}
+
+/* Custom scrollbar for chat */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(75, 85, 99, 0.7);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.8);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(75, 85, 99, 0.9);
+}
+
 /* Form elements */
 .modal-body input {
   width: 100%;

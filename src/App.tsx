@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, createContext, useContext } from 'react';
 import type { FC, ReactNode } from 'react';
 import axios from 'axios';
 import { BrowserRouter, Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
-import { GoogleOAuthProvider, useGoogleLogin, GoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import './index.css';
 
 declare global {
@@ -27,9 +27,7 @@ interface User {
   name: string;
   email: string;
 }
-interface VideoBackgroundProps {
-  theme: string;
-}
+
 interface CareerRecommendation {
   title: string;
   description: string;
@@ -63,14 +61,7 @@ interface IconProps {
   className?: string;
 }
 
-const GoogleIcon: FC<IconProps> = ({ className = '' }) => ( 
-  <svg className={`w-5 h-5 mr-3 ${className}`} viewBox="0 0 48 48">
-    <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
-    <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
-    <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.519-3.486-11.181-8.207l-6.571,4.819C9.656,39.663,16.318,44,24,44z"></path>
-    <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.978,36.218,44,30.608,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
-  </svg> 
-);
+
 const LogoIcon: FC<IconProps> = ({ className = '' }) => ( 
   <svg className={className} width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <defs>
@@ -104,16 +95,7 @@ const SendIcon: FC<IconProps> = ({ className = '' }) => (
     <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
   </svg> 
 );
-const SunIcon: FC<IconProps> = ({ className = '' }) => ( 
-  <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${className}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
-  </svg> 
-);
-const MoonIcon: FC<IconProps> = ({ className = '' }) => ( 
-  <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${className}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-  </svg> 
-);
+
 const ArrowLeftIcon: FC<IconProps> = ({ className = '' }) => ( 
   <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${className}`} viewBox="0 0 20 20" fill="currentColor">
     <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
@@ -122,7 +104,7 @@ const ArrowLeftIcon: FC<IconProps> = ({ className = '' }) => (
 const TypingIndicator: FC = () => ( <div className="flex items-center space-x-1.5"><div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div><div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: '0.2s' }}></div><div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: '0.4s' }}></div></div> );
 
 // --- Reusable Components ---
-const VideoBackground: FC<VideoBackgroundProps> = ({ theme }) => {
+const VideoBackground: FC = () => {
   return (
     <div className="absolute top-0 left-0 w-full h-full -z-10 overflow-hidden">
       <video
@@ -190,30 +172,6 @@ const Navbar: FC = () => {
 };
 
 const MainContent: FC = () => {
-  const [recommendation, setRecommendation] = useState('');
-  const recommendations = [
-    'AI Ethicist',
-    'Quantum Computing Scientist',
-    'Bio-Integration Specialist',
-    'Neural Interface Designer',
-    'Fusion Energy Technician'
-  ];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeout(() => {
-        const randomIndex = Math.floor(Math.random() * recommendations.length);
-        setRecommendation(recommendations[randomIndex]);
-      }, 1500);
-    }, 5000);
-    
-    setTimeout(() => {
-      const randomIndex = Math.floor(Math.random() * recommendations.length);
-      setRecommendation(recommendations[randomIndex]);
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div className="w-full lg:w-1/2 p-4 flex flex-col justify-center items-center min-h-0">
@@ -246,7 +204,8 @@ const CareerCoach: FC = () => {
   const [isChatting, setIsChatting] = useState(false); 
   const [isLoading, setIsLoading] = useState(false); 
   const [error, setError] = useState<string | null>(null); 
-  const chatEndRef = useRef<HTMLDivElement>(null); 
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null); 
 
   useEffect(() => { 
     if (isChatting) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); 
@@ -310,7 +269,8 @@ const CareerCoach: FC = () => {
       .replace(/```[\s\S]*?```/g, '')
       .replace(/`(.*?)`/g, '$1')
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-      .replace(/\n\s*\n/g, '\n')
+      .replace(/\n\s*\n/g, '\n\n')
+      .replace(/\n/g, '\n')
       .trim();
   };
 
@@ -320,6 +280,12 @@ const CareerCoach: FC = () => {
     const userMessage: Message = { sender: 'user', text: input }; 
     setMessages(prev => [...prev, userMessage]); 
     setInput(''); 
+    
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '48px';
+    }
+    
     getAIResponse(userMessage); 
   }; 
 
@@ -339,20 +305,20 @@ const CareerCoach: FC = () => {
             <h2 className="text-xl font-semibold text-slate-800 dark:text-white">Career Coach</h2>
           </div>
           
-          <div className="flex-grow overflow-y-auto p-4">
+          <div className="flex-grow overflow-y-auto overflow-x-hidden p-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
             {isChatting ? ( 
-              <div className="space-y-4">
+              <div className="space-y-4 w-full overflow-hidden">
                 {messages.map((msg, index) => (
-                  <div key={index} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
+                  <div key={index} className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                     {msg.sender === 'ai' && (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold mt-1">
                         AI
                       </div>
                     )}
                     <div 
-                      className={`px-4 py-2.5 rounded-xl max-w-xs md:max-w-sm ${
+                      className={`px-4 py-3 rounded-xl min-w-0 flex-1 max-w-[calc(100%-3rem)] chat-message ${
                         msg.sender === 'user' 
-                          ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white' 
+                          ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white ml-8' 
                           : 'glass-card text-slate-800 dark:text-white'
                       }`}
                     >
@@ -401,20 +367,32 @@ const CareerCoach: FC = () => {
           </div>
           
           <div className="p-4 border-t border-white/20 flex-shrink-0">
-            <div className="relative">
-              <input 
-                type="text" 
+            <div className="relative flex items-end gap-2">
+              <textarea 
+                ref={textareaRef}
                 value={input} 
-                onChange={(e) => setInput(e.target.value)} 
-                onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSendMessage()} 
-                placeholder={isChatting ? "Type your message..." : "Or ask anything about your career..."} 
-                className="glass-input w-full pr-12 py-3 text-slate-800 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 rounded-xl" 
-                disabled={isLoading} 
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  // Auto-resize textarea
+                  const textarea = e.target;
+                  textarea.style.height = 'auto';
+                  textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+                }}
+                onKeyPress={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                placeholder={isChatting ? "Type your message... (Shift+Enter for new line)" : "Or ask anything about your career..."} 
+                className="glass-input flex-1 py-3 px-4 text-slate-800 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 rounded-xl resize-none min-h-[48px] max-h-[120px] overflow-y-auto leading-6" 
+                disabled={isLoading}
+                rows={1}
               />
               <button 
                 onClick={handleSendMessage} 
                 disabled={isLoading || input.trim() === ''} 
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all transform hover:scale-110 disabled:scale-100"
+                className="p-3 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all transform hover:scale-110 disabled:scale-100 flex-shrink-0"
               >
                 <SendIcon />
               </button>
@@ -550,32 +528,7 @@ const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, initialMode }) => {
     } 
   };
 
-  // Handler for useGoogleLogin hook (access token flow)
-  const handleGoogleSignIn = useGoogleLogin({ 
-    scope: 'openid email profile',
-    prompt: 'select_account',
-    include_granted_scopes: true,
-    onSuccess: async (tokenResponse) => { 
-      try { 
-        setIsLoading(true); 
-        console.log('Google OAuth Success (Access Token):', tokenResponse);
-        const res = await axios.post(`${API_URL}/auth/google`, { 
-          token: tokenResponse.access_token, 
-        }); 
-        login(res.data.user, res.data.token); 
-        onClose(); 
-      } catch (err) { 
-        setError('Google Sign-In failed. Please try again.'); 
-        console.error('Google Auth Error:', err); 
-      } finally { 
-        setIsLoading(false); 
-      } 
-    }, 
-    onError: (error) => { 
-      console.error('Google OAuth Error:', error);
-      setError('Google Sign-In failed. Please try again.'); 
-    } 
-  }); 
+ 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => { 
     setFormData({ ...formData, [e.target.name]: e.target.value }); 
@@ -719,8 +672,8 @@ const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, initialMode }) => {
               </div>
             </div>
 
-            <div className="mt-6 space-y-3">
-              {/* Primary Google Login Component - Better for account selection */}
+            <div className="mt-6">
+              {/* Google Login Component */}
               <div className="w-full">
                 <GoogleLogin
                   onSuccess={handleGoogleLoginSuccess}
@@ -738,20 +691,6 @@ const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, initialMode }) => {
                   auto_select={false}
                 />
               </div>
-              
-              {/* Fallback Custom Button */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleGoogleSignIn();
-                }}
-                className="btn-google w-full"
-                disabled={isLoading}
-              >
-                <GoogleIcon className="h-5 w-5" />
-                <span>{mode === 'login' ? 'Alternative Sign in with Google' : 'Alternative Sign up with Google'}</span>
-              </button>
             </div>
 
             <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
@@ -847,7 +786,7 @@ const AppProvider: FC<{ children: ReactNode }> = ({ children }) => {
   return ( 
     <AppContext.Provider value={contextValue}>
       <div className="min-h-screen w-full font-sans relative overflow-hidden">
-        <VideoBackground theme="dark" />
+        <VideoBackground />
         {children}
         <AuthModal isOpen={isModalOpen} onClose={closeModal} initialMode={authMode} />
       </div>
