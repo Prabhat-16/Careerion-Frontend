@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blue Glow Transparency Effect</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Minimal overlay for maximum transparency */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                rgba(15, 23, 42, 0.2) 0%, 
+                rgba(30, 41, 59, 0.15) 50%, 
+                rgba(15, 23, 42, 0.25) 100%
+            );
+        }
+        
+        /* Blue glowing navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            backdrop-filter: blur(12px);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1), 
+                rgba(255, 255, 255, 0.05)
+            );
+            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 
+                0 0 20px rgba(59, 130, 246, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9), 0 1px 6px rgba(0, 0, 0, 0.7);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-button {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.15), 
+                rgba(255, 255, 255, 0.08)
+            );
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            box-shadow: 
+                0 0 10px rgba(59, 130, 246, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-button:hover {
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 
+                0 0 20px rgba(59, 130, 246, 0.3),
+                0 0 40px rgba(59, 130, 246, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            padding-top: 6rem;
+        }
+        
+        /* Blue glowing glass panel - exactly like your screenshot */
+        .glass-panel {
+            backdrop-filter: blur(16px);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1), 
+                rgba(255, 255, 255, 0.05)
+            );
+            border-radius: 24px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            box-shadow: 
+                0 0 0 1px rgba(59, 130, 246, 0.5),
+                0 0 20px rgba(59, 130, 246, 0.3),
+                0 0 40px rgba(59, 130, 246, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.8), 
+                rgba(147, 51, 234, 0.6),
+                rgba(59, 130, 246, 0.4)
+            );
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0.7;
+        }
+        
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9), 0 1px 6px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .description {
+            font-size: 1.125rem;
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9), 0 1px 6px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .label {
+            display: block;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.75rem;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9), 0 1px 6px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Blue glowing inputs - matching your screenshot */
+        .input {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            color: white;
+            min-height: 120px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(12px);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.15), 
+                rgba(255, 255, 255, 0.08)
+            );
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 
+                0 0 0 1px rgba(59, 130, 246, 0.2),
+                0 0 10px rgba(59, 130, 246, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        
+        .input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .input:focus {
+            outline: none;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.25), 
+                rgba(255, 255, 255, 0.15)
+            );
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 
+                0 0 0 1px rgba(59, 130, 246, 0.4),
+                0 0 20px rgba(59, 130, 246, 0.3),
+                0 0 40px rgba(59, 130, 246, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .button {
+            width: 100%;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px -5px rgba(79, 70, 229, 0.5);
+        }
+        
+        .helper-text {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 0.5rem;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9), 0 1px 6px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .glow-info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1), 
+                rgba(255, 255, 255, 0.05)
+            );
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 
+                0 0 20px rgba(59, 130, 246, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="video-background">
+        <video autoplay loop muted playsinline>
+            <source src="/videos/Robot-3.mp4" type="video/mp4">
+        </video>
+        <div class="overlay"></div>
+        <div class="gradient-overlay"></div>
+    </div>
+    
+    <nav class="navbar">
+        <div class="logo">🚀 Careerion</div>
+        <div class="nav-buttons">
+            <a href="#" class="nav-button">Sign up</a>
+            <a href="#" class="nav-button">Log in</a>
+        </div>
+    </nav>
+    
+    <div class="content">
+        <div class="glass-panel">
+            <h1 class="title">Welcome to Your Career Journey</h1>
+            <h2 class="subtitle">Find Your Perfect Career Path</h2>
+            <p class="description">Tell us about yourself, and our AI will suggest careers tailored to you.</p>
+            
+            <form>
+                <div class="form-group">
+                    <label class="label">What are your skills?</label>
+                    <textarea class="input" placeholder="e.g., Python, React, Public Speaking, Project Management, Data Analysis, Creative Writing..."></textarea>
+                    <p class="helper-text">Include both technical and soft skills you possess or are developing.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="label">What are your interests?</label>
+                    <textarea class="input" placeholder="e.g., Technology, Healthcare, Art, Finance, Renewable Energy, Education, Gaming..."></textarea>
+                    <p class="helper-text">What fields, industries, or activities genuinely excite you?</p>
+                </div>
+                
+                <button type="submit" class="button">Discover My Career Path</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="glow-info">
+        <strong>✨ Blue Glow Effect:</strong><br>
+        ✅ Blue glowing borders on all elements<br>
+        ✅ Gradient blue border animation<br>
+        ✅ Transparent glass with blue accents<br>
+        ✅ Matching your screenshot design<br>
+        ✅ Enhanced focus states with blue glow<br><br>
+        <strong>Live at:</strong> <code>http://localhost:3002/test-blue-glow.html</code>
+    </div>
+</body>
+</html>

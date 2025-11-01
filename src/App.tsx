@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, createContext, useContext } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import type { FC, ReactNode } from 'react';
 import axios from 'axios';
 import { BrowserRouter, Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
@@ -34,8 +34,39 @@ interface CareerRecommendation {
   key_skills: string[];
 }
 interface ProfileFormData {
-  skills: string;
+  // Personal Information
+  name: string;
+  age: string;
+  location: string;
+  
+  // Education
+  educationLevel: string;
+  fieldOfStudy: string;
+  institution: string;
+  graduationYear: string;
+  
+  // Experience
+  workExperience: string;
+  currentJobTitle: string;
+  yearsOfExperience: string;
+  
+  // Skills & Interests
+  technicalSkills: string;
+  softSkills: string;
   interests: string;
+  hobbies: string;
+  
+  // Career Goals
+  careerGoals: string;
+  preferredIndustries: string;
+  workEnvironment: string;
+  salaryExpectations: string;
+  willingToRelocate: string;
+  
+  // Additional Info
+  strengths: string;
+  challenges: string;
+  motivations: string;
 }
 
 // --- Context for Global State Management ---
@@ -117,7 +148,8 @@ const VideoBackground: FC = () => {
         <source src="/videos/Robot-3.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      <div className="absolute inset-0 bg-black/50"></div>
+      <div className="absolute inset-0 bg-black/30"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-slate-800/15 to-slate-900/25"></div>
     </div>
   );
 };
@@ -127,7 +159,7 @@ const Navbar: FC = () => {
   const { currentUser, logout, openModal } = useAppContext(); 
   
   return ( 
-    <nav className="w-full p-4 flex justify-between items-center mb-4 bg-white/20 dark:bg-slate-900/30 backdrop-blur-lg border-b border-white/20 dark:border-slate-700">
+    <nav className="w-full p-4 flex justify-between items-center mb-4 backdrop-blur-md navbar-glow">
       <div className="flex items-center space-x-3">
         <LogoIcon />
         <h1 className="text-2xl font-bold tracking-wide text-slate-800 dark:text-white">
@@ -407,7 +439,435 @@ const CareerCoach: FC = () => {
 // --- Page and Dashboard Components ---
 const RecommendationsDisplay: FC<{ recommendations: CareerRecommendation[] }> = ({ recommendations }) => { return ( <div className="w-full max-w-4xl mx-auto"><h2 className="text-3xl font-bold glass-text mb-8">Here are your recommended career paths:</h2><div className="grid md:grid-cols-3 gap-6">{recommendations.map((rec, index) => ( <div key={index} className="p-6 rounded-2xl glass-effect dark-glass-effect"><h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">{rec.title}</h3><p className="text-slate-600 dark:text-gray-300 text-sm mb-4">{rec.description}</p><h4 className="font-semibold text-slate-700 dark:text-gray-200 mb-2 text-sm">Key Skills:</h4><ul className="list-disc list-inside text-sm text-slate-600 dark:text-gray-300">{rec.key_skills.map((skill, i) => <li key={i}>{skill}</li>)}</ul></div> ))}</div></div> ); };
 const FollowUpChat: FC<{ initialHistory: Message[] }> = ({ initialHistory }) => { const [messages, setMessages] = useState<Message[]>(initialHistory); const [input, setInput] = useState(''); const [isLoading, setIsLoading] = useState(false); const handleSendMessage = async () => { if (input.trim() === '' || isLoading) return; const userMessage: Message = { sender: 'user', text: input }; const newMessages = [...messages, userMessage]; setMessages(newMessages); setInput(''); setIsLoading(true); const history = newMessages.map(msg => ({ role: msg.sender === 'user' ? 'user' : 'model', parts: [{ text: msg.text }] })); try { const res = await axios.post(`${API_URL}/chat`, { history, message: input }); setMessages(prev => [...prev, { sender: 'ai', text: res.data.response }]); } catch (error) { console.error(error); setMessages(prev => [...prev, { sender: 'ai', text: "Sorry, I ran into an error." }]); } finally { setIsLoading(false); } }; return ( <div className="w-full max-w-4xl mx-auto mt-12"><h2 className="text-3xl font-bold glass-text mb-8 text-center">Have more questions?</h2><div className="p-4 rounded-2xl glass-effect dark-glass-effect"><div className="relative"><input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSendMessage()} placeholder="Ask about these careers..." className="glass-input pr-12 text-slate-800 dark:text-white placeholder-slate-500 dark:placeholder-gray-400" disabled={isLoading} /><button onClick={handleSendMessage} disabled={isLoading} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:bg-indigo-800 transition-colors"><SendIcon /></button></div></div></div> ); };
-const ProfileForm: FC<{ onGetRecommendations: (data: ProfileFormData) => void, isLoading: boolean }> = ({ onGetRecommendations, isLoading }) => { const [formData, setFormData] = useState<ProfileFormData>({ skills: '', interests: '' }); const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => { setFormData({ ...formData, [e.target.name]: e.target.value }); }; const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onGetRecommendations(formData); }; return ( <div className="p-8 md:p-12 rounded-2xl glass-effect dark-glass-effect max-w-2xl mx-auto"><h2 className="text-3xl font-bold glass-text mb-2">Find Your Career Path</h2><p className="text-slate-600 dark:text-gray-300 mb-8">Tell us about yourself, and our AI will suggest careers tailored to you.</p><form onSubmit={handleSubmit} className="space-y-6"><div><label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">Your Skills</label><textarea name="skills" value={formData.skills} onChange={handleChange} placeholder="e.g., Python, React, Public Speaking, Project Management" className="glass-input min-h-[100px] text-slate-800 dark:text-white" required /></div><div><label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">Your Interests</label><textarea name="interests" value={formData.interests} onChange={handleChange} placeholder="e.g., Technology, Healthcare, Art, Finance, Renewable Energy" className="glass-input min-h-[100px] text-slate-800 dark:text-white" required /></div><button type="submit" disabled={isLoading} className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50">{isLoading ? 'Analyzing...' : 'Find My Career Path'}</button></form></div> ); };
+const ProfileForm: FC<{ onGetRecommendations: (data: ProfileFormData) => void, isLoading: boolean }> = ({ onGetRecommendations, isLoading }) => { 
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState<ProfileFormData>({ 
+    // Personal Information
+    name: '',
+    age: '',
+    location: '',
+    
+    // Education
+    educationLevel: '',
+    fieldOfStudy: '',
+    institution: '',
+    graduationYear: '',
+    
+    // Experience
+    workExperience: '',
+    currentJobTitle: '',
+    yearsOfExperience: '',
+    
+    // Skills & Interests
+    technicalSkills: '',
+    softSkills: '',
+    interests: '',
+    hobbies: '',
+    
+    // Career Goals
+    careerGoals: '',
+    preferredIndustries: '',
+    workEnvironment: '',
+    salaryExpectations: '',
+    willingToRelocate: '',
+    
+    // Additional Info
+    strengths: '',
+    challenges: '',
+    motivations: ''
+  }); 
+  
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement>) => { 
+    setFormData({ ...formData, [e.target.name]: e.target.value }); 
+  }; 
+  
+  const handleSubmit = (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    onGetRecommendations(formData); 
+  }; 
+
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 4));
+  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+  
+  const renderStep = () => {
+    switch(currentStep) {
+      case 1:
+        return (
+          <div className="space-y-8">
+            <div className="form-section-header">
+              <h3 className="form-section-title">
+                Personal Information
+              </h3>
+              <p className="form-section-subtitle">
+                Tell us about yourself to get started
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="form-field-group">
+                <label>Full Name *</label>
+                <input 
+                  type="text"
+                  name="name" 
+                  value={formData.name} 
+                  onChange={handleChange} 
+                  placeholder="Your full name" 
+                  required 
+                />
+              </div>
+              
+              <div className="form-field-group">
+                <label>Age Range *</label>
+                <select 
+                  name="age" 
+                  value={formData.age} 
+                  onChange={handleChange} 
+                  required
+                >
+                  <option value="">Select age range</option>
+                  <option value="18-22">18-22</option>
+                  <option value="23-27">23-27</option>
+                  <option value="28-32">28-32</option>
+                  <option value="33-37">33-37</option>
+                  <option value="38-42">38-42</option>
+                  <option value="43+">43+</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="form-field-group">
+              <label>Location *</label>
+              <input 
+                type="text"
+                name="location" 
+                value={formData.location} 
+                onChange={handleChange} 
+                placeholder="City, State/Country" 
+                required 
+              />
+            </div>
+          </div>
+        );
+        
+      case 2:
+        return (
+          <div className="space-y-8">
+            <div className="form-section-header">
+              <h3 className="form-section-title">
+                Education & Experience
+              </h3>
+              <p className="form-section-subtitle">
+                Share your educational background and professional experience
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="form-field-group">
+                <label>Education Level *</label>
+                <select 
+                  name="educationLevel" 
+                  value={formData.educationLevel} 
+                  onChange={handleChange} 
+                  required
+                >
+                  <option value="">Select education level</option>
+                  <option value="High School">High School</option>
+                  <option value="Associate Degree">Associate Degree</option>
+                  <option value="Bachelor's Degree">Bachelor's Degree</option>
+                  <option value="Master's Degree">Master's Degree</option>
+                  <option value="PhD/Doctorate">PhD/Doctorate</option>
+                  <option value="Professional Certification">Professional Certification</option>
+                  <option value="Self-taught">Self-taught</option>
+                </select>
+              </div>
+              
+              <div className="form-field-group">
+                <label>Field of Study</label>
+                <input 
+                  type="text"
+                  name="fieldOfStudy" 
+                  value={formData.fieldOfStudy} 
+                  onChange={handleChange} 
+                  placeholder="e.g., Computer Science, Business, Psychology" 
+                />
+              </div>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="form-field-group">
+                <label>Institution</label>
+                <input 
+                  type="text"
+                  name="institution" 
+                  value={formData.institution} 
+                  onChange={handleChange} 
+                  placeholder="University/School name" 
+                />
+              </div>
+              
+              <div className="form-field-group">
+                <label>Years of Experience *</label>
+                <select 
+                  name="yearsOfExperience" 
+                  value={formData.yearsOfExperience} 
+                  onChange={handleChange} 
+                  required
+                >
+                  <option value="">Select experience</option>
+                  <option value="0">No experience</option>
+                  <option value="1-2">1-2 years</option>
+                  <option value="3-5">3-5 years</option>
+                  <option value="6-10">6-10 years</option>
+                  <option value="10+">10+ years</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="form-field-group">
+              <label>Current Job Title</label>
+              <input 
+                type="text"
+                name="currentJobTitle" 
+                value={formData.currentJobTitle} 
+                onChange={handleChange} 
+                placeholder="e.g., Software Developer, Marketing Manager, Student" 
+              />
+            </div>
+          </div>
+        );
+        
+      case 3:
+        return (
+          <div className="space-y-8">
+            <div className="form-section-header">
+              <h3 className="form-section-title">
+                Skills & Interests
+              </h3>
+              <p className="form-section-subtitle">
+                Help us understand your abilities and what drives you
+              </p>
+            </div>
+            
+            <div className="form-field-group">
+              <label>Technical Skills *</label>
+              <textarea 
+                name="technicalSkills" 
+                value={formData.technicalSkills} 
+                onChange={handleChange} 
+                placeholder="e.g., Python, JavaScript, SQL, Adobe Creative Suite, Data Analysis, Machine Learning..." 
+                rows={4}
+                required 
+              />
+            </div>
+            
+            <div className="form-field-group">
+              <label>Soft Skills *</label>
+              <textarea 
+                name="softSkills" 
+                value={formData.softSkills} 
+                onChange={handleChange} 
+                placeholder="e.g., Leadership, Communication, Problem-solving, Teamwork, Time Management..." 
+                rows={4}
+                required 
+              />
+            </div>
+            
+            <div className="form-field-group">
+              <label>Professional Interests *</label>
+              <textarea 
+                name="interests" 
+                value={formData.interests} 
+                onChange={handleChange} 
+                placeholder="e.g., Artificial Intelligence, Healthcare Innovation, Sustainable Energy, Digital Marketing..." 
+                rows={4}
+                required 
+              />
+            </div>
+            
+            <div className="form-field-group">
+              <label>Hobbies & Personal Interests</label>
+              <textarea 
+                name="hobbies" 
+                value={formData.hobbies} 
+                onChange={handleChange} 
+                placeholder="e.g., Photography, Gaming, Reading, Sports, Music, Volunteering..." 
+                rows={3}
+              />
+            </div>
+          </div>
+        );
+        
+      case 4:
+        return (
+          <div className="space-y-8">
+            <div className="form-section-header">
+              <h3 className="form-section-title">
+                Career Goals & Preferences
+              </h3>
+              <p className="form-section-subtitle">
+                Tell us about your career aspirations and work preferences
+              </p>
+            </div>
+            
+            <div className="form-field-group">
+              <label>Career Goals *</label>
+              <textarea 
+                name="careerGoals" 
+                value={formData.careerGoals} 
+                onChange={handleChange} 
+                placeholder="e.g., Become a senior developer, Start my own business, Work in healthcare innovation..." 
+                rows={4}
+                required 
+              />
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="form-field-group">
+                <label>Preferred Work Environment *</label>
+                <select 
+                  name="workEnvironment" 
+                  value={formData.workEnvironment} 
+                  onChange={handleChange} 
+                  required
+                >
+                  <option value="">Select preference</option>
+                  <option value="Remote">Remote</option>
+                  <option value="In-office">In-office</option>
+                  <option value="Hybrid">Hybrid</option>
+                  <option value="Flexible">Flexible</option>
+                </select>
+              </div>
+              
+              <div className="form-field-group">
+                <label>Willing to Relocate? *</label>
+                <select 
+                  name="willingToRelocate" 
+                  value={formData.willingToRelocate} 
+                  onChange={handleChange} 
+                  required
+                >
+                  <option value="">Select option</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="Maybe">Maybe</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="form-field-group">
+              <label>Preferred Industries *</label>
+              <textarea 
+                name="preferredIndustries" 
+                value={formData.preferredIndustries} 
+                onChange={handleChange} 
+                placeholder="e.g., Technology, Healthcare, Finance, Education, Entertainment, Non-profit..." 
+                rows={3}
+                required 
+              />
+            </div>
+            
+            <div className="form-field-group">
+              <label>What motivates you most in your career? *</label>
+              <textarea 
+                name="motivations" 
+                value={formData.motivations} 
+                onChange={handleChange} 
+                placeholder="e.g., Making a positive impact, Financial stability, Creative expression, Continuous learning..." 
+                rows={4}
+                required 
+              />
+            </div>
+          </div>
+        );
+        
+      default:
+        return null;
+    }
+  };
+  
+  return ( 
+    <div className="w-full max-w-5xl mx-auto p-6">
+      {/* Header Section */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gradient mb-6 text-with-shadow">
+          Welcome to Your Career Journey
+        </h1>
+        <h2 className="text-2xl md:text-3xl font-semibold text-slate-800 dark:text-white mb-4 text-with-shadow">
+          Let's Build Your Complete Profile
+        </h2>
+        <p className="text-lg text-slate-700 dark:text-gray-200 max-w-3xl mx-auto text-with-shadow leading-relaxed">
+          The more we know about you, the better career recommendations we can provide. This comprehensive profile will help us understand your background, skills, and aspirations.
+        </p>
+      </div>
+      
+      {/* Progress Indicator */}
+      <div className="progress-indicator mb-12">
+        {[1, 2, 3, 4].map((step, index) => (
+          <React.Fragment key={step}>
+            <div
+              className={`progress-dot ${
+                step < currentStep ? 'completed' : 
+                step === currentStep ? 'active' : 'inactive'
+              }`}
+            />
+            {index < 3 && (
+              <div className={`progress-line ${step < currentStep ? 'completed' : step === currentStep ? 'active' : ''}`} />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+      
+      {/* Step Counter */}
+      <div className="step-counter mb-8">
+        Step {currentStep} of 4
+      </div>
+      
+      {/* Main Form Container */}
+      <div className="glass-panel-prominent">
+        <div className="glass-panel-prominent-inner">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Form Step Content */}
+            <div className="form-step-container">
+              <div className="form-step">
+                {renderStep()}
+              </div>
+            </div>
+            
+            {/* Navigation Buttons */}
+            <div className="form-navigation">
+              <button
+                type="button"
+                onClick={prevStep}
+                disabled={currentStep === 1}
+                className="btn-secondary"
+              >
+                Previous
+              </button>
+              
+              {currentStep < 4 ? (
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="btn-primary"
+                >
+                  Next Step
+                </button>
+              ) : (
+                <button 
+                  type="submit" 
+                  disabled={isLoading} 
+                  className={`btn-primary ${isLoading ? 'btn-loading' : ''}`}
+                >
+                  {isLoading ? 'Analyzing Your Profile...' : 'Get My Career Recommendations'}
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  ); 
+};
 const DashboardPage: FC = () => {
   const [recommendations, setRecommendations] = useState<CareerRecommendation[] | null>(null);
   const [initialHistory, setInitialHistory] = useState<Message[]>([]);
@@ -483,7 +943,122 @@ const DashboardPage: FC = () => {
       )}
       {error && <p className="
 text-red-500 mt-4">{error}</p>}</main> ); };
-const HomePage: FC = () => { return ( <main className="flex flex-col lg:flex-row container mx-auto px-6 pb-12"><MainContent /><CareerCoach /></main> ); };
+
+// User Profile Form Page - shown after login
+const UserProfileFormPage: FC = () => {
+  const [recommendations, setRecommendations] = useState<CareerRecommendation[] | null>(null);
+  const [initialHistory, setInitialHistory] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Robust extractor for JSON array/object from a possibly noisy string
+  const extractJson = (text: string): any | null => {
+    if (!text) return null;
+    let cleaned = text
+      .replace(/```json[\s\S]*?```/gi, (m) => m.replace(/```json|```/gi, ''))
+      .replace(/```[\s\S]*?```/g, (m) => m.replace(/```/g, ''))
+      .trim();
+    const start = cleaned.search(/[\[{]/);
+    if (start === -1) return null;
+    cleaned = cleaned.slice(start);
+    // Try full parse first
+    try { return JSON.parse(cleaned); } catch {}
+    // Try shrinking from the end
+    for (let i = cleaned.length; i > 0; i--) {
+      const candidate = cleaned.slice(0, i).trim();
+      try { return JSON.parse(candidate); } catch {}
+    }
+    return null;
+  };
+
+  const handleGetRecommendations = async (profileData: ProfileFormData) => {
+    setIsLoading(true);
+    setError(null);
+    const prompt = `Based on the following user profile, recommend 3 career paths. For each path, provide a "title", a "description", and an array of 3 "key_skills". Return ONLY valid JSON (array of objects) with no extra text.\nUser Profile:\n- Skills: ${profileData.skills}\n- Interests: ${profileData.interests}`;
+    const historyForChat: Message[] = [{ sender: 'user', text: `Here is my profile for career recommendations:\nSkills: ${profileData.skills}\nInterests: ${profileData.interests}` }];
+    try {
+      const res = await axios.post(`${API_URL}/chat`, {
+        message: prompt,
+        expectJson: true,
+        systemPrompt: 'Reply with ONLY valid minified JSON (array of objects with keys: title, description, key_skills). No prose, no markdown.',
+      });
+
+      let parsed: any = res.data?.json || null;
+      if (!parsed) {
+        parsed = extractJson(res.data?.response || '');
+      }
+      if (!parsed) throw new Error('No JSON could be extracted');
+
+      // Basic validation
+      if (!Array.isArray(parsed)) throw new Error('Parsed JSON is not an array');
+      const normalized: CareerRecommendation[] = parsed.map((item: any) => ({
+        title: String(item.title || ''),
+        description: String(item.description || ''),
+        key_skills: Array.isArray(item.key_skills) ? item.key_skills.map((s: any) => String(s)) : [],
+      }));
+
+      setRecommendations(normalized);
+      historyForChat.push({ sender: 'ai', text: `Based on your profile, here are some recommendations: ${JSON.stringify(normalized, null, 2)}`});
+      setInitialHistory(historyForChat);
+    } catch (err) {
+      console.error('Error parsing AI response:', err);
+      setError("Sorry, we couldn't get recommendations. The AI response might have been in an unexpected format. Please try rephrasing your skills and interests.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <main className="min-h-screen flex items-center justify-center p-6">
+      <div className="w-full max-w-4xl">
+        {!recommendations ? (
+          <div className="glass-panel-prominent max-w-3xl mx-auto">
+            <div className="glass-panel-prominent-inner">
+              <ProfileForm onGetRecommendations={handleGetRecommendations} isLoading={isLoading} />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            <div className="glass-panel">
+              <div className="glass-panel-inner">
+                <RecommendationsDisplay recommendations={recommendations} />
+              </div>
+            </div>
+            <div className="glass-panel">
+              <div className="glass-panel-inner">
+                <FollowUpChat initialHistory={initialHistory} />
+              </div>
+            </div>
+          </div>
+        )}
+        {error && (
+          <div className="glass-panel mt-6">
+            <div className="glass-panel-inner">
+              <p className="text-red-500 text-center">{error}</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
+  );
+};
+
+const HomePage: FC = () => { 
+  const { currentUser } = useAppContext();
+  
+  // If user is logged in, show the profile form
+  if (currentUser) {
+    return <UserProfileFormPage />;
+  }
+  
+  // If user is not logged in, show the main landing page
+  return ( 
+    <main className="flex flex-col lg:flex-row container mx-auto px-6 pb-12">
+      <MainContent />
+      <CareerCoach />
+    </main> 
+  ); 
+};
 const AppLayout: FC = () => { return ( <div className="relative z-10"><Navbar /><Outlet /></div> ); };
 
 const ProtectedRoute: FC = () => {
