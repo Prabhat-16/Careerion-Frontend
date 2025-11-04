@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import type { FC, ReactNode } from 'react';
 import axios from 'axios';
 import { BrowserRouter, Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
@@ -53,6 +53,7 @@ interface ProfileFormData {
   // Skills & Interests
   technicalSkills: string;
   softSkills: string;
+  skills: string; // Added for compatibility
   interests: string;
   hobbies: string;
   
@@ -105,34 +106,11 @@ const LogoIcon: FC<IconProps> = ({ className = '' }) => (
     <path d="M50 50 Q 50 20, 80 20" fill="none" stroke="url(#grad3)" strokeWidth="12" strokeLinecap="round"/>
   </svg> 
 );
-const SparklesIcon: FC<IconProps> = ({ className = '' }) => ( 
-  <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${className}`} viewBox="0 0 20 20" fill="currentColor">
-    <path fillRule="evenodd" d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM5.22 5.22a.75.75 0 011.06 0l1.06 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zM13.66 6.34a.75.75 0 011.06-1.06l1.06 1.06a.75.75 0 11-1.06 1.06l-1.06-1.06zM2 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 012 10zm14.25.75a.75.75 0 000-1.5h-1.5a.75.75 0 000 1.5h1.5zm-6.03 4.47a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm1.06-1.06a.75.75 0 011.06 0l1.06 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zM10 18a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 0110 18z" clipRule="evenodd" />
-  </svg> 
-);
-const BriefcaseIcon: FC<IconProps> = ({ className = '' }) => ( 
-  <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${className}`} viewBox="0 0 20 20" fill="currentColor">
-    <path fillRule="evenodd" d="M10 2a2 2 0 00-2 2v1H6a2 2 0 00-2 2v7a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2V4a2 2 0 00-2-2zm-1 2V4a1 1 0 112 0v1H9z" clipRule="evenodd" />
-  </svg> 
-);
-const ChatBubbleLeftRightIcon: FC<IconProps> = ({ className = '' }) => ( 
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`h-5 w-5 mr-2 ${className}`}>
-    <path fillRule="evenodd" d="M10 2c-2.236 0-4.43.89-6.08 2.418a.75.75 0 00.96 1.144A7.49 7.49 0 0110 3.5c1.554 0 2.999.462 4.242 1.238a.75.75 0 00.96-1.144A8.962 8.962 0 0010 2zM3.92 15.582A8.962 8.962 0 0010 18c2.236 0 4.43-.89 6.08-2.418a.75.75 0 00-.96-1.144A7.49 7.49 0 0110 16.5c-1.554 0-2.999-.462-4.242-1.238a.75.75 0 00-.96 1.144z" clipRule="evenodd" />
-    <path d="M2.122 7.034a.75.75 0 001.038-.283A7.465 7.465 0 0110 5.5c1.843 0 3.543.64 4.84 1.751a.75.75 0 001.038.283c.32-.244.4-.698.156-1.018A8.962 8.962 0 0010 4c-2.54 0-4.857.996-6.634 2.618a.75.75 0 00.756 1.416zM2.122 12.966a.75.75 0 00-.756-1.416A8.962 8.962 0 0010 16c2.54 0 4.857-.996-6.634-2.618a.75.75 0 00-.756-1.416.75.75 0 00-1.038.283A7.465 7.465 0 0110 14.5c-1.843 0-3.543-.64-4.84-1.751a.75.75 0 00-1.038.283z" />
-  </svg> 
-);
 const SendIcon: FC<IconProps> = ({ className = '' }) => ( 
   <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${className}`} viewBox="0 0 20 20" fill="currentColor">
     <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
   </svg> 
 );
-
-const ArrowLeftIcon: FC<IconProps> = ({ className = '' }) => ( 
-  <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${className}`} viewBox="0 0 20 20" fill="currentColor">
-    <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-  </svg> 
-);
-const TypingIndicator: FC = () => ( <div className="flex items-center space-x-1.5"><div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div><div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: '0.2s' }}></div><div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: '0.4s' }}></div></div> );
 
 // --- Reusable Components ---
 const VideoBackground: FC = () => {
@@ -230,206 +208,17 @@ const MainContent: FC = () => {
   );
 };
 
+// Import the enhanced career chat component
+import EnhancedCareerChat from './components/EnhancedCareerChat';
+// Import the enhanced career dashboard
+import CareerDashboard from './components/CareerDashboard';
+
 const CareerCoach: FC = () => { 
-  const [messages, setMessages] = useState<Message[]>([]); 
-  const [input, setInput] = useState(''); 
-  const [isChatting, setIsChatting] = useState(false); 
-  const [isLoading, setIsLoading] = useState(false); 
-  const [error, setError] = useState<string | null>(null); 
-  const chatEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null); 
-
-  useEffect(() => { 
-    if (isChatting) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); 
-  }, [messages, isChatting]); 
-
-  const handleBack = () => { 
-    setIsChatting(false); 
-    setMessages([]); 
-    setError(null); 
-  }; 
-
-  const getAIResponse = async (userMessage: Message) => { 
-    setIsLoading(true); 
-    setError(null); 
-    const history = messages.map(msg => ({ 
-      role: msg.sender === 'user' ? 'user' : 'model', 
-      parts: [{ text: msg.text }] 
-    })); 
-    try { 
-      const res = await axios.post(`${API_URL}/chat`, { 
-        history, 
-        message: userMessage.text,
-        systemPrompt: 'Please respond in plain text without using markdown formatting like asterisks or backticks.'
-      }); 
-      const cleanedResponse = cleanResponseText(res.data.response);
-      setMessages(prev => [...prev, { sender: 'ai', text: cleanedResponse }]); 
-    } catch (err) { 
-      setError('Sorry, something went wrong. Please try again.'); 
-      console.error(err); 
-    } finally { 
-      setIsLoading(false); 
-    } 
-  }; 
-
-  const startConversation = (topic: string) => { 
-    setIsChatting(true); 
-    let userMessageText = ''; 
-    switch(topic) { 
-      case 'discover': 
-        userMessageText = 'Help me discover my career path.'; 
-        break; 
-      case 'explore': 
-        userMessageText = 'I want to explore some career fields.'; 
-        break; 
-      case 'chat': 
-        userMessageText = 'I just want to chat.'; 
-        break; 
-      default: 
-        return; 
-    } 
-    const userMessage: Message = { sender: 'user', text: userMessageText }; 
-    setMessages([userMessage]); 
-    getAIResponse(userMessage); 
-  }; 
-
-  const cleanResponseText = (text: string) => {
-    if (!text) return '';
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/\*(.*?)\*/g, '$1')
-      .replace(/```[\s\S]*?```/g, '')
-      .replace(/`(.*?)`/g, '$1')
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-      .replace(/\n\s*\n/g, '\n\n')
-      .replace(/\n/g, '\n')
-      .trim();
-  };
-
-  const handleSendMessage = () => { 
-    if (input.trim() === '' || isLoading) return; 
-    if (!isChatting) setIsChatting(true); 
-    const userMessage: Message = { sender: 'user', text: input }; 
-    setMessages(prev => [...prev, userMessage]); 
-    setInput(''); 
-    
-    // Reset textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = '48px';
-    }
-    
-    getAIResponse(userMessage); 
-  }; 
-
   return ( 
     <div className="w-full lg:w-1/2 p-6 flex items-center justify-center slide-in-right">
       <div className="glass-panel w-full max-w-md h-[70vh] flex flex-col rounded-2xl overflow-hidden border-2 border-indigo-300 dark:border-indigo-500 transition-colors">
         <div className="glass-panel-inner flex flex-col h-full">
-          <div className="flex items-center justify-center relative p-4 border-b border-white/20 flex-shrink-0">
-            {isChatting && (
-              <button 
-                onClick={handleBack} 
-                className="absolute left-4 p-1.5 rounded-full text-slate-700 dark:text-gray-200 hover:bg-white/20 transition-colors"
-              >
-                <ArrowLeftIcon />
-              </button>
-            )}
-            <h2 className="text-xl font-semibold text-slate-800 dark:text-white">Career Coach</h2>
-          </div>
-          
-          <div className="flex-grow overflow-y-auto overflow-x-hidden p-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
-            {isChatting ? ( 
-              <div className="space-y-4 w-full overflow-hidden">
-                {messages.map((msg, index) => (
-                  <div key={index} className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    {msg.sender === 'ai' && (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold mt-1">
-                        AI
-                      </div>
-                    )}
-                    <div 
-                      className={`px-4 py-3 rounded-xl min-w-0 flex-1 max-w-[calc(100%-3rem)] chat-message ${
-                        msg.sender === 'user' 
-                          ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white ml-8' 
-                          : 'glass-card text-slate-800 dark:text-white'
-                      }`}
-                    >
-                      {msg.sender === 'ai' ? cleanResponseText(msg.text) : msg.text}
-                    </div>
-                  </div>
-                ))}
-                {isLoading && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">
-                      AI
-                    </div>
-                    <div className="glass-card px-4 py-2.5 rounded-xl">
-                      <TypingIndicator />
-                    </div>
-                  </div>
-                )}
-                {error && <div className="text-center text-red-500 dark:text-red-400 text-sm p-2">{error}</div>}
-                <div ref={chatEndRef} />
-              </div>
-            ) : ( 
-              <div className="space-y-4 p-2">
-                <button 
-                  onClick={() => startConversation('discover')} 
-                  className="glass-btn w-full flex items-center justify-center text-left p-4 text-slate-800 dark:text-white hover:scale-[1.02] transition-transform"
-                >
-                  <SparklesIcon className="flex-shrink-0" />
-                  <span className="ml-2">Discover My Career Path</span>
-                </button>
-                <button 
-                  onClick={() => startConversation('explore')} 
-                  className="glass-btn w-full flex items-center justify-center text-left p-4 text-slate-800 dark:text-white hover:scale-[1.02] transition-transform"
-                >
-                  <BriefcaseIcon className="flex-shrink-0" />
-                  <span className="ml-2">Explore Career Fields</span>
-                </button>
-                <button 
-                  onClick={() => startConversation('chat')} 
-                  className="glass-btn w-full flex items-center justify-center text-left p-4 text-slate-800 dark:text-white hover:scale-[1.02] transition-transform"
-                >
-                  <ChatBubbleLeftRightIcon className="flex-shrink-0" />
-                  <span className="ml-2">Chat with AI</span>
-                </button>
-              </div>
-            )}
-          </div>
-          
-          <div className="p-4 border-t border-white/20 flex-shrink-0">
-            <div className="relative flex items-end gap-2">
-              <textarea 
-                ref={textareaRef}
-                value={input} 
-                onChange={(e) => {
-                  setInput(e.target.value);
-                  // Auto-resize textarea
-                  const textarea = e.target;
-                  textarea.style.height = 'auto';
-                  textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-                }}
-                onKeyPress={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
-                }}
-                placeholder={isChatting ? "Type your message... (Shift+Enter for new line)" : "Or ask anything about your career..."} 
-                className="glass-input flex-1 py-3 px-4 text-slate-800 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 rounded-xl resize-none min-h-[48px] max-h-[120px] overflow-y-auto leading-6" 
-                disabled={isLoading}
-                rows={1}
-              />
-              <button 
-                onClick={handleSendMessage} 
-                disabled={isLoading || input.trim() === ''} 
-                className="p-3 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all transform hover:scale-110 disabled:scale-100 flex-shrink-0"
-              >
-                <SendIcon />
-              </button>
-            </div>
-          </div>
+          <EnhancedCareerChat className="h-full" />
         </div>
       </div>
     </div>
@@ -869,80 +658,8 @@ const ProfileForm: FC<{ onGetRecommendations: (data: ProfileFormData) => void, i
   ); 
 };
 const DashboardPage: FC = () => {
-  const [recommendations, setRecommendations] = useState<CareerRecommendation[] | null>(null);
-  const [initialHistory, setInitialHistory] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Robust extractor for JSON array/object from a possibly noisy string
-  const extractJson = (text: string): any | null => {
-    if (!text) return null;
-    let cleaned = text
-      .replace(/```json[\s\S]*?```/gi, (m) => m.replace(/```json|```/gi, ''))
-      .replace(/```[\s\S]*?```/g, (m) => m.replace(/```/g, ''))
-      .trim();
-    const start = cleaned.search(/[\[{]/);
-    if (start === -1) return null;
-    cleaned = cleaned.slice(start);
-    // Try full parse first
-    try { return JSON.parse(cleaned); } catch {}
-    // Try shrinking from the end
-    for (let i = cleaned.length; i > 0; i--) {
-      const candidate = cleaned.slice(0, i).trim();
-      try { return JSON.parse(candidate); } catch {}
-    }
-    return null;
-  };
-
-  const handleGetRecommendations = async (profileData: ProfileFormData) => {
-    setIsLoading(true);
-    setError(null);
-    const prompt = `Based on the following user profile, recommend 3 career paths. For each path, provide a "title", a "description", and an array of 3 "key_skills". Return ONLY valid JSON (array of objects) with no extra text.\nUser Profile:\n- Skills: ${profileData.skills}\n- Interests: ${profileData.interests}`;
-    const historyForChat: Message[] = [{ sender: 'user', text: `Here is my profile for career recommendations:\nSkills: ${profileData.skills}\nInterests: ${profileData.interests}` }];
-    try {
-      const res = await axios.post(`${API_URL}/chat`, {
-        message: prompt,
-        expectJson: true,
-        systemPrompt: 'Reply with ONLY valid minified JSON (array of objects with keys: title, description, key_skills). No prose, no markdown.',
-      });
-
-      let parsed: any = res.data?.json || null;
-      if (!parsed) {
-        parsed = extractJson(res.data?.response || '');
-      }
-      if (!parsed) throw new Error('No JSON could be extracted');
-
-      // Basic validation
-      if (!Array.isArray(parsed)) throw new Error('Parsed JSON is not an array');
-      const normalized: CareerRecommendation[] = parsed.map((item: any) => ({
-        title: String(item.title || ''),
-        description: String(item.description || ''),
-        key_skills: Array.isArray(item.key_skills) ? item.key_skills.map((s: any) => String(s)) : [],
-      }));
-
-      setRecommendations(normalized);
-      historyForChat.push({ sender: 'ai', text: `Based on your profile, here are some recommendations: ${JSON.stringify(normalized, null, 2)}`});
-      setInitialHistory(historyForChat);
-    } catch (err) {
-      console.error('Error parsing AI response:', err);
-      setError("Sorry, we couldn't get recommendations. The AI response might have been in an unexpected format. Please try rephrasing your skills and interests.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <main className="container mx-auto px-6 py-12 text-center">
-      {!recommendations ? (
-        <ProfileForm onGetRecommendations={handleGetRecommendations} isLoading={isLoading} />
-      ) : (
-        <>
-          <RecommendationsDisplay recommendations={recommendations} />
-          <FollowUpChat initialHistory={initialHistory} />
-        </>
-      )}
-      {error && <p className="
-text-red-500 mt-4">{error}</p>}</main> ); };
+  return <CareerDashboard />;
+};
 
 // User Profile Form Page - shown after login
 const UserProfileFormPage: FC = () => {
