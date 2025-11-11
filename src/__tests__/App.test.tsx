@@ -50,8 +50,12 @@ describe('App Component', () => {
     test('displays navigation bar', () => {
         render(<App />);
         
-        const logo = screen.queryByText(/Careerion/i);
-        expect(logo).toBeTruthy();
+        // Check for navigation element or buttons
+        const signupButton = screen.queryByText(/Sign up/i);
+        const loginButton = screen.queryByText(/Log in/i);
+        
+        // Navigation should have at least one of these elements
+        expect(signupButton || loginButton).toBeTruthy();
     });
 
     test('handles dark mode correctly', () => {

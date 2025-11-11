@@ -125,8 +125,8 @@ describe('EnhancedCareerChat Component', () => {
         fireEvent.change(input, { target: { value: 'Test' } });
         fireEvent.click(sendButton);
         
-        // Check for loading indicator
-        const loadingText = await screen.findByText(/Generating|Loading|career guidance/i, {}, { timeout: 500 });
+        // Check for loading indicator - look for the specific loading message
+        const loadingText = await screen.findByText(/Generating comprehensive/i, {}, { timeout: 500 });
         expect(loadingText).toBeTruthy();
     });
 
