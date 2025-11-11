@@ -27,11 +27,15 @@ describe('EnhancedCareerChat Component', () => {
     test('displays category filters', () => {
         render(<EnhancedCareerChat />);
         
-        const generalCategory = screen.queryByText(/General Career Guidance/i);
-        const skillsCategory = screen.queryByText(/Skills Development/i);
-        const transitionCategory = screen.queryByText(/Career Transition/i);
+        // Look for category buttons specifically
+        const buttons = screen.getAllByRole('button');
+        const categoryButtons = buttons.filter(btn => 
+            btn.textContent?.includes('General Career Guidance') ||
+            btn.textContent?.includes('Career Transition') ||
+            btn.textContent?.includes('Interview Preparation')
+        );
         
-        expect(generalCategory || skillsCategory || transitionCategory).toBeTruthy();
+        expect(categoryButtons.length).toBeGreaterThan(0);
     });
 
     test('displays quick start questions', () => {
