@@ -438,39 +438,48 @@ const ProfileForm: FC<{ onGetRecommendations: (data: ProfileFormData) => void, i
             </div>
             
             <div className="form-field-group">
-              <label>Technical Skills *</label>
+              <label>Technical Skills * <span className="text-sm text-slate-500">(separate with commas)</span></label>
               <textarea 
                 name="technicalSkills" 
                 value={formData.technicalSkills} 
                 onChange={handleChange} 
-                placeholder="e.g., Python, JavaScript, SQL, Adobe Creative Suite, Data Analysis, Machine Learning..." 
+                placeholder="Python, JavaScript, SQL, Adobe Creative Suite, Data Analysis, Machine Learning, React, Node.js, AWS, Docker..." 
                 rows={4}
                 required 
               />
+              <div className="text-xs text-slate-500 dark:text-gray-400 mt-1">
+                💡 Add each skill separated by commas for better AI career recommendations
+              </div>
             </div>
             
             <div className="form-field-group">
-              <label>Soft Skills *</label>
+              <label>Soft Skills * <span className="text-sm text-slate-500">(separate with commas)</span></label>
               <textarea 
                 name="softSkills" 
                 value={formData.softSkills} 
                 onChange={handleChange} 
-                placeholder="e.g., Leadership, Communication, Problem-solving, Teamwork, Time Management..." 
+                placeholder="Leadership, Communication, Problem-solving, Teamwork, Time Management, Critical Thinking, Adaptability..." 
                 rows={4}
                 required 
               />
+              <div className="text-xs text-slate-500 dark:text-gray-400 mt-1">
+                💡 List your interpersonal and professional soft skills separated by commas
+              </div>
             </div>
             
             <div className="form-field-group">
-              <label>Professional Interests *</label>
+              <label>Professional Interests * <span className="text-sm text-slate-500">(separate with commas)</span></label>
               <textarea 
                 name="interests" 
                 value={formData.interests} 
                 onChange={handleChange} 
-                placeholder="e.g., Artificial Intelligence, Healthcare Innovation, Sustainable Energy, Digital Marketing..." 
+                placeholder="Artificial Intelligence, Healthcare Innovation, Sustainable Energy, Digital Marketing, Data Science, Cybersecurity..." 
                 rows={4}
                 required 
               />
+              <div className="text-xs text-slate-500 dark:text-gray-400 mt-1">
+                💡 List your professional interests and industry areas separated by commas
+              </div>
             </div>
             
             <div className="form-field-group">

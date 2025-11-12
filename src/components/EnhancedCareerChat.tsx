@@ -172,13 +172,13 @@ const EnhancedCareerChat: React.FC<EnhancedCareerChatProps> = ({ className = '' 
         // Check if it's a header (starts with ##, ###, etc.)
         if (paragraph.match(/^#{1,3}\s/)) {
           const level = paragraph.match(/^(#{1,3})/)?.[1].length || 1;
-          const text = paragraph.replace(/^#{1,3}\s/, '');
+          const headerText = paragraph.replace(/^#{1,3}\s/, '');
           const className = level === 1 ? 'text-lg font-bold mt-4 mb-2' : 
                           level === 2 ? 'text-base font-semibold mt-3 mb-2' : 
                           'text-sm font-medium mt-2 mb-1';
           return (
             <div key={index} className={className}>
-              {text}
+              {formatInlineText(headerText)}
             </div>
           );
         }
@@ -188,7 +188,7 @@ const EnhancedCareerChat: React.FC<EnhancedCareerChatProps> = ({ className = '' 
           return (
             <div key={index} className="ml-4 mb-1">
               <span className="text-indigo-400 mr-2">•</span>
-              {paragraph.replace(/^[-*•]\s/, '')}
+              {formatInlineText(paragraph.replace(/^[-*•]\s/, ''))}
             </div>
           );
         }
@@ -197,7 +197,7 @@ const EnhancedCareerChat: React.FC<EnhancedCareerChatProps> = ({ className = '' 
         if (paragraph.match(/^\d+\.\s/)) {
           return (
             <div key={index} className="ml-4 mb-1">
-              {paragraph}
+              {formatInlineText(paragraph)}
             </div>
           );
         }
@@ -205,11 +205,59 @@ const EnhancedCareerChat: React.FC<EnhancedCareerChatProps> = ({ className = '' 
         // Regular paragraph
         return (
           <div key={index} className="mb-3 leading-relaxed">
-            {paragraph}
+            {formatInlineText(paragraph)}
           </div>
         );
       })
       .filter(Boolean);
+  };
+
+  // Helper function to format inline text (bold, italic, etc.)
+  const formatInlineText = (text: string) => {
+    // Split text by markdown patterns and format accordingly
+    const parts = [];
+    let currentIndex = 0;
+    
+    // Regular expression to match bold (**text** or __text__), italic (*text* or _text_)
+    const markdownRegex = /(\*\*([^*]+)\*\*|__([^_]+)__|(?<!\*)\*([^*]+)\*(?!\*)|(?<!_)_([^_]+)_(?!_))/g;
+    
+    let match;
+    while ((match = markdownRegex.exec(text)) !== null) {
+      // Add text before the match
+      if (match.index > currentIndex) {
+        parts.push(text.slice(currentIndex, match.index));
+      }
+      
+      // Add formatted text
+      const fullMatch = match[0];
+      const boldText1 = match[2]; // **text**
+      const boldText2 = match[3]; // __text__
+      const italicText1 = match[4]; // *text*
+      const italicText2 = match[5]; // _text_
+      
+      if (boldText1 || boldText2) {
+        parts.push(
+          <strong key={match.index} className="font-semibold text-slate-900 dark:text-white">
+            {boldText1 || boldText2}
+          </strong>
+        );
+      } else if (italicText1 || italicText2) {
+        parts.push(
+          <em key={match.index} className="italic text-slate-700 dark:text-gray-300">
+            {italicText1 || italicText2}
+          </em>
+        );
+      }
+      
+      currentIndex = match.index + fullMatch.length;
+    }
+    
+    // Add remaining text
+    if (currentIndex < text.length) {
+      parts.push(text.slice(currentIndex));
+    }
+    
+    return parts.length > 1 ? parts : text;
   };
 
   return (

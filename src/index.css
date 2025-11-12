@@ -385,6 +385,19 @@ input, textarea, select {
          placeholder-gray-400 dark:placeholder-gray-500;
 }
 
+/* Fix dropdown option visibility */
+select option {
+  background-color: white !important;
+  color: #1f2937 !important; /* Dark gray text */
+  padding: 8px !important;
+  font-weight: 500 !important;
+}
+
+.dark select option {
+  background-color: #1e293b !important; /* Dark background */
+  color: #f3f4f6 !important; /* Light text */
+}
+
 /* Custom checkbox */
 input[type="checkbox"] {
   @apply w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500;
@@ -466,6 +479,19 @@ input[type="radio"] {
   @apply outline-none ring-2 ring-opacity-50 ring-blue-400;
   background: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* Glass input dropdown options */
+select.glass-input option {
+  background-color: white !important;
+  color: #1f2937 !important; /* Dark text for visibility */
+  padding: 10px !important;
+  font-weight: 500 !important;
+}
+
+.dark select.glass-input option {
+  background-color: #1e293b !important; /* Dark background */
+  color: #f3f4f6 !important; /* Light text */
 }
 
 /* Specific styling for the gradient in the LogoIcon */
@@ -1016,6 +1042,19 @@ ti-Step Form Enhancements */
   background: rgba(15, 23, 42, 0.2);
   color: #f3f4f6;
   border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Form field group dropdown options */
+.form-field-group select option {
+  background-color: white !important;
+  color: #1f2937 !important; /* Dark text for visibility */
+  padding: 10px !important;
+  font-weight: 500 !important;
+}
+
+.dark .form-field-group select option {
+  background-color: #1e293b !important; /* Dark background */
+  color: #f3f4f6 !important; /* Light text */
 }
 
 .form-field-group input:focus,
