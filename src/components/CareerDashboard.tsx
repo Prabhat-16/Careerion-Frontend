@@ -27,10 +27,18 @@ interface CareerInsight {
   priority: 'high' | 'medium' | 'low';
 }
 
+interface AIRecommendation {
+  response: string;
+  modelUsed: string;
+  timestamp: Date;
+}
+
 const CareerDashboard: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [careerInsights, setCareerInsights] = useState<CareerInsight[]>([]);
+  const [aiRecommendation, setAiRecommendation] = useState<AIRecommendation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'chat' | 'profile'>('overview');
   const [profileComplete, setProfileComplete] = useState(false);
 
@@ -58,21 +66,41 @@ const CareerDashboard: React.FC = () => {
   };
 
   const generateCareerInsights = async () => {
+    setIsGeneratingInsights(true);
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
 
+      // Use the working chat API to generate career recommendations
       const response = await axios.post(
-        `${API_URL}/career-recommendations`,
+        `${API_URL}/chat`,
         {
-          query: 'Generate 4 personalized career insights and action items based on my profile. Focus on immediate actionable steps I can take to advance my career.',
-          category: 'general'
+          message: `Based on my profile, provide 4 specific career recommendations with actionable steps. Format your response using simple markdown with headers (##, ###) and bullet points (-). Avoid complex tables or excessive formatting.
+
+          Structure each recommendation as:
+          ## Career Path/Opportunity Title
+          Brief description (1-2 sentences)
+          
+          ### Action Items:
+          - Specific action item 1
+          - Specific action item 2
+          - Specific action item 3
+          
+          Focus on practical, actionable advice that I can implement right away to advance my career.`,
+          expectJson: false
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Parse the response to extract insights
-      const insights = parseCareerInsights(response.data.response);
+      // Store the full AI recommendation
+      setAiRecommendation({
+        response: response.data.response,
+        modelUsed: response.data.modelUsed || 'AI Model',
+        timestamp: new Date()
+      });
+
+      // Parse the AI response to extract structured insights
+      const insights = parseAICareerInsights(response.data.response);
       setCareerInsights(insights);
     } catch (error) {
       console.error('Error generating career insights:', error);
@@ -91,39 +119,179 @@ const CareerDashboard: React.FC = () => {
           priority: 'medium'
         }
       ]);
+    } finally {
+      setIsGeneratingInsights(false);
     }
   };
 
-  const parseCareerInsights = (response: string): CareerInsight[] => {
-    // Simple parsing logic - in a real app, you'd want more sophisticated parsing
-    const defaultInsights: CareerInsight[] = [
-      {
-        title: 'Professional Development',
-        description: 'Focus on continuous learning and skill enhancement.',
-        actionItems: ['Identify skill gaps', 'Enroll in relevant courses', 'Seek mentorship opportunities'],
-        priority: 'high'
-      },
-      {
-        title: 'Network Building',
-        description: 'Expand your professional network for career opportunities.',
-        actionItems: ['Join industry groups', 'Attend networking events', 'Connect with professionals on LinkedIn'],
-        priority: 'medium'
-      },
-      {
-        title: 'Career Planning',
-        description: 'Set clear career goals and create a roadmap.',
-        actionItems: ['Define short and long-term goals', 'Create a career timeline', 'Regular progress reviews'],
-        priority: 'medium'
-      },
-      {
-        title: 'Personal Branding',
-        description: 'Build a strong professional presence online and offline.',
-        actionItems: ['Update LinkedIn profile', 'Create a portfolio', 'Share industry insights'],
-        priority: 'low'
+  const parseAICareerInsights = (response: string): CareerInsight[] => {
+    try {
+      // Enhanced parsing to extract structured insights from AI response
+      const insights: CareerInsight[] = [];
+      
+      // Split response into sections and look for numbered lists or clear patterns
+      const sections = response.split(/\d+\.\s+|\n\n+/);
+      
+      // Look for patterns like "1. Title", "Description:", "Action Items:", etc.
+      let currentInsight: Partial<CareerInsight> = {};
+      
+      for (const section of sections) {
+        const trimmed = section.trim();
+        if (!trimmed) continue;
+        
+        // Try to identify titles (usually at the start of sections)
+        if (trimmed.length < 100 && !trimmed.includes('.') && insights.length < 4) {
+          if (currentInsight.title) {
+            // Save previous insight if complete
+            if (currentInsight.title && currentInsight.description && currentInsight.actionItems) {
+              insights.push(currentInsight as CareerInsight);
+            }
+          }
+          currentInsight = {
+            title: trimmed.replace(/^\d+\.\s*/, '').replace(/[*#-]/g, '').trim(),
+            actionItems: [],
+            priority: 'medium'
+          };
+        }
+        // Look for descriptions (medium length paragraphs)
+        else if (trimmed.length > 50 && trimmed.length < 300 && !currentInsight.description) {
+          currentInsight.description = trimmed;
+        }
+        // Look for action items (bullet points or numbered lists)
+        else if (trimmed.includes('•') || trimmed.includes('-') || /^\d+\./.test(trimmed)) {
+          const items = trimmed.split(/[•\-]|\d+\./).filter(item => item.trim().length > 10);
+          if (items.length > 0) {
+            currentInsight.actionItems = items.map(item => item.trim()).slice(0, 4);
+          }
+        }
       }
-    ];
+      
+      // Add the last insight
+      if (currentInsight.title && currentInsight.description && currentInsight.actionItems) {
+        insights.push(currentInsight as CareerInsight);
+      }
+      
+      // If parsing didn't work well, create insights from the raw response
+      if (insights.length === 0) {
+        const lines = response.split('\n').filter(line => line.trim().length > 20);
+        const chunks = [];
+        for (let i = 0; i < lines.length; i += 3) {
+          chunks.push(lines.slice(i, i + 3));
+        }
+        
+        chunks.slice(0, 4).forEach((chunk, index) => {
+          insights.push({
+            title: `AI Recommendation ${index + 1}`,
+            description: chunk[0] || 'Career guidance based on your profile.',
+            actionItems: chunk.slice(1).filter(item => item.trim().length > 5).slice(0, 3),
+            priority: index === 0 ? 'high' : index === 1 ? 'medium' : 'low'
+          });
+        });
+      }
+      
+      // Ensure we have at least some insights
+      if (insights.length === 0) {
+        return [
+          {
+            title: 'AI Career Analysis',
+            description: response.substring(0, 200) + '...',
+            actionItems: ['Review the full AI response in the chat section', 'Update your profile for better recommendations', 'Ask specific career questions'],
+            priority: 'high'
+          }
+        ];
+      }
+      
+      return insights.slice(0, 4); // Limit to 4 insights
+    } catch (error) {
+      console.error('Error parsing AI insights:', error);
+      // Return a single insight with the raw AI response
+      return [
+        {
+          title: 'AI Career Guidance',
+          description: 'Your personalized career recommendations from AI.',
+          actionItems: ['View full recommendations in the chat section', 'Ask follow-up questions', 'Update your profile for better insights'],
+          priority: 'high'
+        }
+      ];
+    }
+  };
 
-    return defaultInsights;
+  const formatAIResponse = (response: string) => {
+    // Clean up and parse markdown formatting
+    const lines = response.split('\n');
+    const formattedLines: Array<{type: string, content: string, level?: number}> = [];
+    
+    for (let line of lines) {
+      line = line.trim();
+      
+      // Skip empty lines, table separators, and markdown dividers
+      if (!line || 
+          line.match(/^\|[-:\s]*\|/) || 
+          line.match(/^[-*]{3,}$/) ||
+          line.match(/^\|.*\|.*\|/) ||
+          line.includes('---|---')) {
+        continue;
+      }
+      
+      // Headers
+      if (line.startsWith('### ')) {
+        formattedLines.push({type: 'header', content: line.replace('### ', ''), level: 3});
+      } else if (line.startsWith('## ')) {
+        formattedLines.push({type: 'header', content: line.replace('## ', ''), level: 2});
+      } else if (line.startsWith('# ')) {
+        formattedLines.push({type: 'header', content: line.replace('# ', ''), level: 1});
+      }
+      // Bullet points
+      else if (line.match(/^[-*+] /)) {
+        formattedLines.push({type: 'bullet', content: line.replace(/^[-*+] /, '')});
+      }
+      // Numbered lists
+      else if (line.match(/^\d+\. /)) {
+        formattedLines.push({type: 'numbered', content: line.replace(/^\d+\. /, '')});
+      }
+      // Regular paragraphs
+      else if (line.length > 0) {
+        formattedLines.push({type: 'paragraph', content: line});
+      }
+    }
+    
+    return formattedLines;
+  };
+
+  const renderFormattedContent = (formattedLines: Array<{type: string, content: string, level?: number}>) => {
+    return formattedLines.map((line, index) => {
+      const content = line.content
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+        .replace(/\*(.*?)\*/g, '$1'); // Remove italic markdown
+      
+      switch (line.type) {
+        case 'header':
+          if (line.level === 1) {
+            return <h1 key={index} className="text-2xl font-bold text-slate-800 dark:text-white mt-6 mb-4">{content}</h1>;
+          } else if (line.level === 2) {
+            return <h2 key={index} className="text-xl font-semibold text-slate-800 dark:text-white mt-6 mb-3">{content}</h2>;
+          } else {
+            return <h3 key={index} className="text-lg font-semibold text-slate-800 dark:text-white mt-4 mb-2">{content}</h3>;
+          }
+        case 'bullet':
+          return (
+            <div key={index} className="flex items-start mb-2">
+              <span className="text-indigo-500 mr-2 mt-1">•</span>
+              <span>{content}</span>
+            </div>
+          );
+        case 'numbered':
+          return (
+            <div key={index} className="flex items-start mb-2 ml-4">
+              <span className="text-indigo-500 mr-2">{index + 1}.</span>
+              <span>{content}</span>
+            </div>
+          );
+        case 'paragraph':
+        default:
+          return <p key={index} className="mb-3 leading-relaxed">{content}</p>;
+      }
+    });
   };
 
   const getPriorityColor = (priority: string) => {
@@ -166,6 +334,62 @@ const CareerDashboard: React.FC = () => {
         <p className="text-slate-600 dark:text-gray-400 text-sm">
           Your profile is complete! You'll receive the most accurate career guidance.
         </p>
+      )}
+    </div>
+  );
+
+  const AIRecommendationCard = () => (
+    <div className="glass-card p-6 mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <span className="text-2xl mr-3">🤖</span>
+          <div>
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-white">
+              AI Career Recommendations
+            </h3>
+            {aiRecommendation && (
+              <p className="text-sm text-slate-500 dark:text-gray-400">
+                Generated by {aiRecommendation.modelUsed} • {aiRecommendation.timestamp.toLocaleDateString()}
+              </p>
+            )}
+          </div>
+        </div>
+        <button
+          onClick={generateCareerInsights}
+          disabled={isGeneratingInsights}
+          className={`btn-primary text-sm ${isGeneratingInsights ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          {isGeneratingInsights ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Generating...
+            </div>
+          ) : (
+            '🔄 Refresh'
+          )}
+        </button>
+      </div>
+      
+      {aiRecommendation ? (
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg p-4">
+          <div className="prose prose-sm max-w-none text-slate-700 dark:text-gray-300">
+            {renderFormattedContent(formatAIResponse(aiRecommendation.response))}
+          </div>
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          <div className="text-4xl mb-4">🎯</div>
+          <p className="text-slate-600 dark:text-gray-400 mb-4">
+            Get personalized career recommendations from our AI coach
+          </p>
+          <button
+            onClick={generateCareerInsights}
+            disabled={isGeneratingInsights}
+            className="btn-primary"
+          >
+            Generate AI Recommendations
+          </button>
+        </div>
       )}
     </div>
   );
@@ -245,7 +469,9 @@ const CareerDashboard: React.FC = () => {
         setActiveTab('overview');
         
         // Regenerate insights with new profile data
-        generateCareerInsights();
+        setTimeout(() => {
+          generateCareerInsights();
+        }, 1000); // Small delay to ensure profile is saved
       } catch (error) {
         console.error('Error saving profile:', error);
       } finally {
@@ -418,9 +644,11 @@ const CareerDashboard: React.FC = () => {
         <div className="space-y-8">
           <ProfileCompletionCard />
           
+          <AIRecommendationCard />
+          
           <div>
             <h2 className="text-2xl font-semibold text-slate-800 dark:text-white mb-6">
-              Your Career Insights
+              Quick Action Items
             </h2>
             <CareerInsightsGrid />
           </div>
