@@ -44,7 +44,7 @@ const CareerDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchUserProfile();
-    generateCareerInsights();
+    // Don't auto-generate insights on mount - let user trigger it manually
   }, []);
 
   const fetchUserProfile = async () => {
@@ -71,26 +71,69 @@ const CareerDashboard: React.FC = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
+      // Ensure we have the latest profile data
+      if (!userProfile) {
+        await fetchUserProfile();
+      }
+
+      // Build a message that tells the AI to use the user's profile
+      let message = '';
+      
+      if (userProfile && profileComplete) {
+        message = `Based on my complete profile (education: ${userProfile.educationLevel} in ${userProfile.fieldOfStudy}, current status: ${userProfile.currentStatus}, skills: ${userProfile.skills?.join(', ') || 'various'}, interests: ${userProfile.interests?.join(', ') || 'various'}), provide 4 SPECIFIC and PERSONALIZED career recommendations.
+
+CRITICAL REQUIREMENTS:
+1. Each recommendation MUST directly relate to my field of study (${userProfile.fieldOfStudy})
+2. Each recommendation MUST utilize my specific skills: ${userProfile.skills?.join(', ') || 'my skills'}
+3. Each recommendation MUST align with my interests: ${userProfile.interests?.join(', ') || 'my interests'}
+4. Consider my current status: ${userProfile.currentStatus}
+5. Consider my experience level: ${userProfile.workExperience || 'entry level'}
+6. Address my career goals: ${userProfile.careerGoals || 'career advancement'}
+
+Format each recommendation as:
+## [Specific Career Title matching my profile]
+Why this career matches my education in ${userProfile.fieldOfStudy} and my skills in ${userProfile.skills?.[0] || 'my field'} (1-2 sentences)
+
+### Action Items:
+- Immediate step I can take with my current ${userProfile.educationLevel} education
+- Skill development specific to ${userProfile.fieldOfStudy}
+- Networking or application strategy for ${userProfile.currentStatus} professionals
+
+DO NOT provide generic advice. Every recommendation must be tailored to my specific profile.`;
+      } else {
+        message = `I haven't completed my profile yet. Please:
+1. Explain the importance of completing my profile for personalized career recommendations
+2. List what information I should provide (education, skills, interests, career goals)
+3. Provide 2-3 general career exploration tips
+4. Encourage me to complete my profile in the "Profile" tab
+
+Keep the response brief and motivating.`;
+      }
+
+      // Log profile data for debugging
+      console.log('[Career Insights] Generating with profile:', {
+        complete: profileComplete,
+        education: userProfile?.educationLevel,
+        field: userProfile?.fieldOfStudy,
+        status: userProfile?.currentStatus,
+        skills: userProfile?.skills,
+        interests: userProfile?.interests
+      });
+
       // Use the working chat API to generate career recommendations
       const response = await axios.post(
         `${API_URL}/chat`,
         {
-          message: `Based on my profile, provide 4 specific career recommendations with actionable steps. Format your response using simple markdown with headers (##, ###) and bullet points (-). Avoid complex tables or excessive formatting.
-
-          Structure each recommendation as:
-          ## Career Path/Opportunity Title
-          Brief description (1-2 sentences)
-          
-          ### Action Items:
-          - Specific action item 1
-          - Specific action item 2
-          - Specific action item 3
-          
-          Focus on practical, actionable advice that I can implement right away to advance my career.`,
+          message: message,
           expectJson: false
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
+      console.log('[Career Insights] AI Response received:', {
+        modelUsed: response.data.modelUsed,
+        responseLength: response.data.response?.length
+      });
 
       // Store the full AI recommendation
       setAiRecommendation({
@@ -378,17 +421,51 @@ const CareerDashboard: React.FC = () => {
         </div>
       ) : (
         <div className="text-center py-8">
-          <div className="text-4xl mb-4">🎯</div>
-          <p className="text-slate-600 dark:text-gray-400 mb-4">
-            Get personalized career recommendations from our AI coach
-          </p>
-          <button
-            onClick={generateCareerInsights}
-            disabled={isGeneratingInsights}
-            className="btn-primary"
-          >
-            Generate AI Recommendations
-          </button>
+          {profileComplete ? (
+            <>
+              <div className="text-4xl mb-4">🎯</div>
+              <h4 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
+                Ready for Personalized Recommendations!
+              </h4>
+              <p className="text-slate-600 dark:text-gray-400 mb-4">
+                Your profile is complete. Click below to get AI-powered career recommendations
+                tailored to your education, skills, and career goals.
+              </p>
+              <button
+                onClick={generateCareerInsights}
+                disabled={isGeneratingInsights}
+                className="btn-primary"
+              >
+                {isGeneratingInsights ? 'Generating...' : 'Generate AI Recommendations'}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="text-4xl mb-4">📝</div>
+              <h4 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
+                Complete Your Profile First
+              </h4>
+              <p className="text-slate-600 dark:text-gray-400 mb-4">
+                To get personalized career recommendations, please complete your profile with your
+                education, skills, interests, and career goals.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className="btn-primary"
+                >
+                  Complete Profile
+                </button>
+                <button
+                  onClick={generateCareerInsights}
+                  disabled={isGeneratingInsights}
+                  className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+                >
+                  Get General Advice
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -466,12 +543,15 @@ const CareerDashboard: React.FC = () => {
 
         setUserProfile(formData);
         setProfileComplete(true);
+        
+        // Show success message and switch to overview
+        alert('Profile saved successfully! Generating personalized career recommendations...');
         setActiveTab('overview');
         
         // Regenerate insights with new profile data
         setTimeout(() => {
           generateCareerInsights();
-        }, 1000); // Small delay to ensure profile is saved
+        }, 500); // Small delay to ensure UI updates
       } catch (error) {
         console.error('Error saving profile:', error);
       } finally {
