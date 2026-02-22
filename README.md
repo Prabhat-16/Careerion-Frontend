@@ -461,7 +461,7 @@ For frontend-specific issues:
 - Verify API connectivity
 - Check environment variables
 - Review component props
-- Author - Prabhat Mishra
+- Author - Prabhat Mishra...
 
 ---
 
